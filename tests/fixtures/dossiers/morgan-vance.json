@@ -1,0 +1,159 @@
+{
+  "candidate": {
+    "name": "Dr. Morgan Vance",
+    "email": "morgan.vance@example.org",
+    "phone": "+966 50 000 0000",
+    "location": "Riyadh, Saudi Arabia",
+    "workAuthorization": "Transferable Iqama",
+    "noticePeriodDays": 30,
+    "currentTitle": "Principal Platform Architect",
+    "summary": "Distributed systems engineer and platform architect with 12+ years of experience scaling low-latency data pipelines and cloud infrastructure.",
+    "salaryFloor": {
+      "currency": "SAR",
+      "minimumBase": 45000,
+      "targetTotal": 60000,
+      "disclosurePolicy": "mandatory_only"
+    }
+  },
+  "employers": [
+    {
+      "id": "emp_apex",
+      "name": "Apex Cloud Technologies",
+      "location": "Riyadh, Saudi Arabia",
+      "startYear": 2021,
+      "endYear": null,
+      "isCurrent": true,
+      "title": "Principal Platform Architect"
+    },
+    {
+      "id": "emp_strata",
+      "name": "Strata Data Systems",
+      "location": "London, UK",
+      "startYear": 2017,
+      "endYear": 2021,
+      "isCurrent": false,
+      "title": "Senior Distributed Systems Engineer"
+    },
+    {
+      "id": "emp_nova",
+      "name": "Nova Soft Labs",
+      "location": "Cambridge, UK",
+      "startYear": 2013,
+      "endYear": 2017,
+      "isCurrent": false,
+      "title": "Software Engineer"
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-001",
+      "employerId": "emp_apex",
+      "category": "performance",
+      "text": "Reduced core event-processing p99 latency from 180ms to 42ms through Kafka topic repartitioning and zero-copy deserialization in Go.",
+      "metrics": ["180ms", "42ms", "p99"],
+      "tools": ["Kafka", "Go"],
+      "role": "Principal Platform Architect"
+    },
+    {
+      "id": "CLM-002",
+      "employerId": "emp_apex",
+      "category": "scale",
+      "text": "Architected multi-region Kubernetes cluster hosting 120+ microservices processing 4.5 billion events daily across 3 availability zones.",
+      "metrics": ["120+", "4.5 billion daily", "3 availability zones"],
+      "tools": ["Kubernetes", "Docker", "Prometheus"],
+      "role": "Principal Platform Architect"
+    },
+    {
+      "id": "CLM-003",
+      "employerId": "emp_apex",
+      "category": "cost",
+      "text": "Cut AWS cloud compute and storage expenditure by 34% annually ($480,000 saved) through autoscaling spot fleet orchestration and ARM64 migration.",
+      "metrics": ["34%", "$480,000 saved"],
+      "tools": ["AWS", "EC2", "Spot Instances", "ARM64", "Graviton"],
+      "role": "Principal Platform Architect"
+    },
+    {
+      "id": "CLM-004",
+      "employerId": "emp_apex",
+      "category": "leadership",
+      "text": "Mentored 8 senior and staff engineers across 2 platform squads, leading quarterly architecture review boards and RFC design processes.",
+      "metrics": ["8 engineers", "2 platform squads"],
+      "tools": ["RFCs", "Architecture Review"],
+      "role": "Principal Platform Architect"
+    },
+    {
+      "id": "CLM-005",
+      "employerId": "emp_strata",
+      "category": "reliability",
+      "text": "Maintained 99.99% availability for payment gateway ledger handling GBP 140 million annual transaction volume.",
+      "metrics": ["99.99%", "GBP 140 million"],
+      "tools": ["PostgreSQL", "Redis", "Rust"],
+      "role": "Senior Distributed Systems Engineer"
+    },
+    {
+      "id": "CLM-006",
+      "employerId": "emp_strata",
+      "category": "migration",
+      "text": "Migrated legacy monolithic billing engine to event-driven microservices architecture over 9 months with zero customer downtime.",
+      "metrics": ["9 months", "zero downtime"],
+      "tools": ["RabbitMQ", "Node.js", "Docker"],
+      "role": "Senior Distributed Systems Engineer"
+    },
+    {
+      "id": "CLM-007",
+      "employerId": "emp_strata",
+      "category": "observability",
+      "text": "Implemented distributed tracing across 45 services using OpenTelemetry and Jaeger, reducing mean time to detection (MTTD) by 62%.",
+      "metrics": ["45 services", "62%"],
+      "tools": ["OpenTelemetry", "Jaeger", "Grafana"],
+      "role": "Senior Distributed Systems Engineer"
+    },
+    {
+      "id": "CLM-008",
+      "employerId": "emp_nova",
+      "category": "engineering",
+      "text": "Developed high-throughput telemetry ingestion backend in C++ and Python streaming 50,000 sensor telemetry metrics per second.",
+      "metrics": ["50,000 metrics/sec"],
+      "tools": ["C++", "Python", "gRPC"],
+      "role": "Software Engineer"
+    },
+    {
+      "id": "CLM-009",
+      "employerId": "emp_nova",
+      "category": "testing",
+      "text": "Authored automated fuzzing and regression test framework increasing unit test coverage from 54% to 88%.",
+      "metrics": ["54% to 88%"],
+      "tools": ["GoogleTest", "Python", "GitLab CI"],
+      "role": "Software Engineer"
+    },
+    {
+      "id": "CLM-010",
+      "employerId": "emp_apex",
+      "category": "security",
+      "text": "Enforced zero-trust service mesh using Istio mTLS and SPIFFE/SPIRE identity attestation across 600 production pods.",
+      "metrics": ["600 pods"],
+      "tools": ["Istio", "mTLS", "SPIFFE", "Kubernetes"],
+      "role": "Principal Platform Architect"
+    }
+  ],
+  "degrees": [
+    {
+      "degree": "Ph.D. in Computer Science",
+      "institution": "University of Cambridge",
+      "year": 2013,
+      "thesis": "Fault-Tolerant Consensus in Asynchronous High-Throughput Networks"
+    },
+    {
+      "degree": "B.Sc. in Computer Engineering",
+      "institution": "Imperial College London",
+      "year": 2009
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation",
+      "year": 2022
+    }
+  ]
+}

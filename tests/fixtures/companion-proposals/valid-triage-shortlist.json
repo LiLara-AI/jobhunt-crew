@@ -1,0 +1,9 @@
+{
+  "type": "triage_decision",
+  "jobId": "job_greenhouse_101",
+  "decision": "shortlist",
+  "score": 4.8,
+  "rationale": "Exceptional fit with candidate distributed systems claims [C-01] and [C-04]; compensation exceeds target floor.",
+  "actor": "human:gemini_companion",
+  "timestamp": "2026-10-25T15:30:00.000Z"
+}

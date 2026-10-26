@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "Id": "300000109928172",
+      "RequisitionNumber": "NEOM-2026-901",
+      "Title": "Principal Infrastructure Architect",
+      "PostingTitle": "Principal Infrastructure Architect - Cloud Services",
+      "PrimaryLocation": "NEOM, Tabuk, Saudi Arabia",
+      "PostedDate": "2026-08-15T08:00:00.000+00:00",
+      "JobFamily": "Technology and Digital",
+      "ExternalURL": "https://careers.neom.com/hcmUI/CandidateExperience/en/sites/CX/job/300000109928172?utm_source=linkedin&utm_campaign=hcm",
+      "WorkLocationOption": "HYBRID",
+      "CurrencyCode": "SAR",
+      "MinimumSalary": 48000,
+      "MaximumSalary": 62000
+    }
+  ],
+  "count": 1,
+  "hasMore": true,
+  "limit": 25,
+  "offset": 0,
+  "totalResults": 2
+}

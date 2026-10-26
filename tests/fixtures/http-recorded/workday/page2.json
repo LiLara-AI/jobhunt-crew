@@ -1,0 +1,14 @@
+{
+  "total": 35,
+  "limit": 20,
+  "offset": 20,
+  "jobPostings": [
+    {
+      "bulletFields": ["JR-1021", "Red Sea, Saudi Arabia", "Full time"],
+      "title": "Principal Telemetry Engineer",
+      "externalPath": "/job/Red-Sea/Principal-Telemetry-Engineer_JR-1021",
+      "locationsText": "Red Sea Global, Saudi Arabia",
+      "postedOn": "Posted 45 Days Ago"
+    }
+  ]
+}

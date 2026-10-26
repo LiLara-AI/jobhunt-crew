@@ -1,0 +1,47 @@
+# JobHunt Crew .gitignore
+
+# Runtime ledger, locks, and materialized snapshot
+.crew/
+*.lock
+
+# Node dependencies and packaging
+node_modules/
+dist/
+build/
+*.tgz
+
+# Testing and coverage
+coverage/
+.nyc_output/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# STRICT ZERO-PII: Denylist and local candidate profiles
+.pii-denylist
+*.local.json
+*.local.md
+personal/
+private/
+dossier.json
+inbox/proposals/*.tmp
+
+# Operating System artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and Editor configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*

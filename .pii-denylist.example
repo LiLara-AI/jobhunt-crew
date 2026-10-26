@@ -1,0 +1,30 @@
+# JobHunt Crew — Local PII Denylist Template
+#
+# Instructions:
+# 1. Copy this file to `.pii-denylist` in your repository root:
+#    cp .pii-denylist.example .pii-denylist
+# 2. Add any personal identifiers you want to protect from being committed.
+# 3. Lines starting with # are comments. Empty lines are ignored.
+# 4. Each non-empty line is evaluated as a case-insensitive forbidden string or regex.
+# 5. `.pii-denylist` is gitignored and will never be committed to source control.
+#
+# Run `npm run test:pii` or `node scripts/verify-zero-pii.js` to verify zero committed occurrences.
+
+# Full Name & Nicknames
+# Jane Doe
+# J. Doe
+
+# Email Addresses
+# jane.doe@example.com
+# jdoe.career@example.org
+
+# Phone Numbers (enter various format variants)
+# +15551234567
+# (555) 123-4567
+
+# Identification & Residency Numbers
+# A12345678
+# 1002003004
+
+# Street Address / Home Coordinates
+# 123 Elm Street, Suite 400

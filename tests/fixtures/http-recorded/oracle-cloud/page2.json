@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "Id": "300000109928173",
+      "RequisitionNumber": "NEOM-2026-902",
+      "Title": "Senior Reliability Engineer",
+      "PostingTitle": "Senior Reliability Engineer - Critical Fabrics",
+      "PrimaryLocation": "NEOM, Tabuk, Saudi Arabia",
+      "PostedDate": "2026-05-10T10:30:00.000+00:00",
+      "JobFamily": "Technology and Digital",
+      "ExternalURL": "https://careers.neom.com/hcmUI/CandidateExperience/en/sites/CX/job/300000109928173?ref=careers",
+      "WorkLocationOption": "ONSITE",
+      "CurrencyCode": "SAR",
+      "MinimumSalary": 35000,
+      "MaximumSalary": 45000
+    }
+  ],
+  "count": 1,
+  "hasMore": false,
+  "limit": 25,
+  "offset": 25,
+  "totalResults": 2
+}

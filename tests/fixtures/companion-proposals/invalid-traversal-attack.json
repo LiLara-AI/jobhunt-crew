@@ -1,0 +1,7 @@
+{
+  "type": "draft_proposal",
+  "jobId": "../../etc/shadow",
+  "draftType": "cv",
+  "draftText": "Malicious payload attempting directory traversal out of application folder.",
+  "actor": "gemini_companion"
+}

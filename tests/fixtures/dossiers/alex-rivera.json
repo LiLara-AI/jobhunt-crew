@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "name": "Alex Rivera",
+    "email": "alex.rivera@example.org",
+    "phone": "+966 55 111 2222",
+    "location": "Jeddah, Saudi Arabia",
+    "workAuthorization": "Saudi National",
+    "noticePeriodDays": 60,
+    "currentTitle": "Staff Full-Stack Engineer",
+    "summary": "Full-stack engineer with 9 years of experience specializing in TypeScript, React, Node.js, and high-concurrency e-commerce backends.",
+    "salaryFloor": {
+      "currency": "SAR",
+      "minimumBase": 35000,
+      "targetTotal": 45000,
+      "disclosurePolicy": "negotiable_placeholder"
+    }
+  },
+  "employers": [
+    {
+      "id": "emp_bazaar",
+      "name": "Bazaar Retail Systems",
+      "location": "Riyadh, Saudi Arabia",
+      "startYear": 2022,
+      "endYear": null,
+      "isCurrent": true,
+      "title": "Staff Full-Stack Engineer"
+    },
+    {
+      "id": "emp_oasis",
+      "name": "Oasis Digital Commerce",
+      "location": "Dubai, UAE",
+      "startYear": 2018,
+      "endYear": 2022,
+      "isCurrent": false,
+      "title": "Senior Frontend Engineer"
+    }
+  ],
+  "claims": [
+    {
+      "id": "ALX-001",
+      "employerId": "emp_bazaar",
+      "category": "performance",
+      "text": "Redesigned mobile checkout web flow in Next.js reducing checkout drop-off by 19% across 2.2 million monthly active shoppers.",
+      "metrics": ["19%", "2.2 million MAU"],
+      "tools": ["Next.js", "React", "TypeScript"],
+      "role": "Staff Full-Stack Engineer"
+    },
+    {
+      "id": "ALX-002",
+      "employerId": "emp_bazaar",
+      "category": "scale",
+      "text": "Built real-time inventory reservation service handling 14,000 peak requests per second during promotional flash sales.",
+      "metrics": ["14,000 RPS"],
+      "tools": ["Node.js", "Redis", "PostgreSQL"],
+      "role": "Staff Full-Stack Engineer"
+    },
+    {
+      "id": "ALX-003",
+      "employerId": "emp_oasis",
+      "category": "web-vitals",
+      "text": "Optimized Core Web Vitals across 80 storefront templates, decreasing Largest Contentful Paint (LCP) from 3.8s to 1.1s.",
+      "metrics": ["3.8s to 1.1s", "80 templates"],
+      "tools": ["Lighthouse", "Web Vitals", "Webpack"],
+      "role": "Senior Frontend Engineer"
+    },
+    {
+      "id": "ALX-004",
+      "employerId": "emp_oasis",
+      "category": "design-system",
+      "text": "Established enterprise design system component library in React adopted by 5 engineering squads, accelerating sprint delivery by 25%.",
+      "metrics": ["5 squads", "25%"],
+      "tools": ["Storybook", "React", "Tailwind CSS"],
+      "role": "Senior Frontend Engineer"
+    }
+  ],
+  "degrees": [
+    {
+      "degree": "B.Sc. in Software Engineering",
+      "institution": "King Fahd University of Petroleum & Minerals",
+      "year": 2016
+    }
+  ],
+  "certifications": []
+}

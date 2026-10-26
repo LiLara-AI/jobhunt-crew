@@ -1,0 +1,6 @@
+{
+  "type": "triage_decision",
+  "jobId": "job_broken_syntax",
+  "decision": "shortlist",
+  "score": 4.5,
+  "notes": "Truncated json payload missing closing braces

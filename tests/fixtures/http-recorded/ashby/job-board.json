@@ -1,0 +1,23 @@
+{
+  "apiVersion": "1.0",
+  "jobBoard": {
+    "name": "Nova Systems",
+    "jobPostings": [
+      {
+        "id": "ashby-posting-401",
+        "title": "Principal Architect - Infrastructure",
+        "departmentName": "Cloud Infrastructure",
+        "locationName": "Riyadh, Saudi Arabia",
+        "employmentType": "FullTime",
+        "isRemote": false,
+        "publishedAt": "2026-04-10T08:00:00Z",
+        "jobUrl": "https://jobs.ashbyhq.com/novasystems/ashby-posting-401?utm_medium=jobboard",
+        "compensation": {
+          "compensationCurrency": "SAR",
+          "compensationTierSummary": "45,000 - 60,000 SAR / month"
+        },
+        "descriptionHtml": "<p>Lead technical evolution of distributed storage and compute fabrics.</p>"
+      }
+    ]
+  }
+}

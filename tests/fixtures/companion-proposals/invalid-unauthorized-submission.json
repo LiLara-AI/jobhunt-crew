@@ -1,0 +1,8 @@
+{
+  "type": "status_update",
+  "jobId": "job_greenhouse_101",
+  "action": "submitted",
+  "status": "submitted",
+  "notes": "Adversarial companion proposal attempting unauthorized submission without human authorization",
+  "actor": "gemini_companion"
+}

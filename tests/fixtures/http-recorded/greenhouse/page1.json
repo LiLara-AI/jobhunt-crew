@@ -1,0 +1,27 @@
+{
+  "jobs": [
+    {
+      "id": 50101,
+      "title": "Staff Platform Engineer",
+      "updated_at": "2026-09-15T12:00:00Z",
+      "location": { "name": "Riyadh, Saudi Arabia" },
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/50101?gh_jid=50101",
+      "metadata": [
+        { "name": "Department", "value": "Platform Infrastructure" },
+        { "name": "Employment Type", "value": "Full-time" }
+      ],
+      "content": "&lt;p&gt;Seeking an experienced Staff Platform Engineer to scale Kubernetes and cloud infrastructure.&lt;/p&gt;"
+    },
+    {
+      "id": 50102,
+      "title": "Principal Distributed Systems Architect",
+      "updated_at": "2026-06-01T09:30:00Z",
+      "location": { "name": "Riyadh, Saudi Arabia (Hybrid)" },
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/50102?gh_jid=50102",
+      "metadata": [
+        { "name": "Department", "value": "Platform Infrastructure" }
+      ],
+      "content": "&lt;p&gt;Lead multi-region data platform architecture with Kafka and Go.&lt;/p&gt;"
+    }
+  ]
+}

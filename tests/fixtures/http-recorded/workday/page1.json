@@ -1,0 +1,21 @@
+{
+  "total": 35,
+  "limit": 20,
+  "offset": 0,
+  "jobPostings": [
+    {
+      "bulletFields": ["JR-1001", "Riyadh, Saudi Arabia", "Full time"],
+      "title": "Director of Cloud Infrastructure & Operations",
+      "externalPath": "/job/Riyadh/Director-Cloud-Infrastructure_JR-1001",
+      "locationsText": "Riyadh, Saudi Arabia",
+      "postedOn": "Posted 120 Days Ago"
+    },
+    {
+      "bulletFields": ["JR-1002", "NEOM, Saudi Arabia", "Full time"],
+      "title": "Lead Distributed Platform Engineer",
+      "externalPath": "/job/NEOM/Lead-Distributed-Platform-Engineer_JR-1002",
+      "locationsText": "NEOM, Saudi Arabia",
+      "postedOn": "Posted 90 Days Ago"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "totalFound": 25,
+  "offset": 0,
+  "limit": 10,
+  "content": [
+    {
+      "id": "sr-post-1",
+      "name": "Senior Cloud Infrastructure Architect",
+      "uuid": "sr-uuid-001",
+      "refNumber": "REF-SR-01",
+      "releasedDate": "2026-03-01T00:00:00.000Z",
+      "location": {
+        "city": "Riyadh",
+        "region": "Riyadh Region",
+        "country": "sa"
+      },
+      "department": { "label": "Engineering" }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+JobHunt Crew
+Copyright (c) 2026 JobHunt Crew Authors
+
+This product includes software developed by the JobHunt Crew Authors and
+is distributed under the terms of the MIT License.
+
+========================================================================
+1. Clean-Room Provenance & Independent Architecture
+========================================================================
+
+JobHunt Crew is an independently developed, clean-room software system
+created from first principles.
+
+The architecture, event engine, data structures, and agent specifications
+contained in this repository were authored cleanly without copying,
+adapting, or incorporating source code or assets from restricted or
+proprietary third-party systems.
+
+Specifically:
+- Restricted third-party repositories, including "job-hunt-copilot"
+  (personally licensed) and "Job-Ops" (licensed under the Commons Clause),
+  were strictly isolated and quarantined. No source code, text, or
+  materials from those repositories were viewed, accessed, or copied during
+  the development of this project.
+- Provenance and originality are deterministically enforced using automated
+  clean-room shingle fingerprint checking (SHA-256 hash sets of normalized
+  token sequences), verifying zero unauthorized textual overlap.
+
+========================================================================
+2. Attribution of Permissive Open-Source Concept Inspirations
+========================================================================
+
+JobHunt Crew acknowledges conceptual inspiration from the following
+permissively licensed open-source project:
+
+* career-ops
+  License: MIT License
+  Copyright (c) 2024-2026 career-ops Contributors
+  Portions of the high-level system design—specifically abstract concepts
+  regarding multi-dimensional vacancy triage scoring, search query syntax
+  for Applicant Tracking System (ATS) domains, title taxonomy mapping, and
+  candidate follow-up cadences—were informed by permissive patterns
+  established in the career-ops project. All implementations, algorithms,
+  ledger schemas, and agent prompt topologies in JobHunt Crew were written
+  entirely from scratch.
+
+========================================================================
+3. Open-Source Ecosystem & Runtime Dependencies
+========================================================================
+
+JobHunt Crew runs on the Node.js runtime environment and may integrate with
+or reference the following permissively licensed libraries and frameworks:
+
+* Node.js (OpenJS Foundation)
+  License: MIT License / Node.js License
+  Website: https://nodejs.org
+
+* Model Context Protocol (MCP) SDK & Specifications (Anthropic, PBC)
+  License: MIT License
+  Website: https://modelcontextprotocol.io
+
+* OpenXML & Document Processing Libraries (if packaged)
+  License: MIT / Apache-2.0 Licenses
+
+========================================================================
+4. Zero Personal Identifiable Information (PII) Commitment
+========================================================================
+
+All names, contact details, career histories, employer profiles, and metrics
+contained within repository fixtures, golden benchmarks, integration tests,
+and documentation examples are entirely fictitious (e.g., "Dr. Morgan Vance",
+"Alex Rivera"). Any resemblance to actual persons, living or dead, or real
+organizations is entirely coincidental.
+
+User-specific candidate data, credentials, and identity tokens reside
+strictly on the user's local machine in uncommitted, gitignored files
+and are never transmitted to external SaaS or centralized database stores.

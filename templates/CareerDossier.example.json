@@ -1,0 +1,71 @@
+{
+  "candidate": {
+    "name": "Alex Rivera",
+    "email": "alex.rivera@example.org",
+    "phone": "+966 55 111 2222",
+    "location": "Riyadh, Saudi Arabia",
+    "workAuthorization": "Saudi National",
+    "noticePeriodDays": 30,
+    "currentTitle": "Staff Software Engineer",
+    "summary": "Full-stack engineer with 9 years of experience specializing in distributed systems, TypeScript, Node.js, and cloud architectures.",
+    "salaryFloor": {
+      "currency": "SAR",
+      "minimumBase": 35000,
+      "targetTotal": 45000,
+      "disclosurePolicy": "negotiable_placeholder"
+    }
+  },
+  "employers": [
+    {
+      "id": "emp_apex",
+      "name": "Apex Cloud Technologies",
+      "location": "Riyadh, Saudi Arabia",
+      "startYear": 2022,
+      "endYear": null,
+      "isCurrent": true,
+      "title": "Staff Software Engineer"
+    },
+    {
+      "id": "emp_oasis",
+      "name": "Oasis Digital Commerce",
+      "location": "Dubai, UAE",
+      "startYear": 2018,
+      "endYear": 2022,
+      "isCurrent": false,
+      "title": "Senior Backend Engineer"
+    }
+  ],
+  "claims": [
+    {
+      "id": "ALX-001",
+      "category": "performance",
+      "employerId": "emp_apex",
+      "text": "Architected event-driven microservices processing 12,000 requests per second with sub-50ms latency.",
+      "metrics": [
+        { "type": "throughput", "value": 12000, "unit": "rps" },
+        { "type": "latency", "value": 50, "unit": "ms" }
+      ],
+      "technologies": ["Node.js", "TypeScript", "Redis", "Kafka"]
+    },
+    {
+      "id": "ALX-002",
+      "category": "leadership",
+      "employerId": "emp_apex",
+      "text": "Mentored 6 junior and mid-level engineers, establishing engineering quality standards and automated CI/CD pipelines.",
+      "metrics": [
+        { "type": "count", "value": 6, "unit": "engineers" }
+      ],
+      "technologies": ["GitHub Actions", "Docker", "Kubernetes"]
+    },
+    {
+      "id": "ALX-003",
+      "category": "cost_optimization",
+      "employerId": "emp_oasis",
+      "text": "Reduced cloud infrastructure expenditures by 28% through autoscaling optimization and caching strategies.",
+      "metrics": [
+        { "type": "percentage", "value": 28, "unit": "percent" }
+      ],
+      "technologies": ["AWS", "Terraform", "CloudFront"]
+    }
+  ]
+}

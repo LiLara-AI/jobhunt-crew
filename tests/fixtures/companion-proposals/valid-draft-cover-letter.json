@@ -1,0 +1,10 @@
+{
+  "type": "draft_proposal",
+  "jobId": "job_greenhouse_101",
+  "draftType": "cover_letter",
+  "draftText": "Dear Hiring Team,\n\nI am writing to express my strong interest in the Staff Infrastructure Engineer position. In my previous role, I scaled Kafka infrastructure to handle 1.8M events/sec [C-01] and optimized cloud spend by 35% across 200 nodes [C-04].\n\nSincerely,\nAlex Rivera",
+  "claimsUsed": ["C-01", "C-04"],
+  "notes": "Generated in Gemini Desktop Companion with focus on cloud scale and cost efficiency.",
+  "actor": "gemini_companion",
+  "timestamp": "2026-10-25T15:32:00.000Z"
+}

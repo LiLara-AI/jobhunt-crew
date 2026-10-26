@@ -1,0 +1,7 @@
+{
+  "type": "claim_confirmation",
+  "claimId": "C-04",
+  "evidence": "Led cloud migration of 45 microservices to Kubernetes as documented in internal RFC #204 and Q3 infrastructure review.",
+  "actor": "human:candidate",
+  "timestamp": "2026-10-25T15:31:00.000Z"
+}

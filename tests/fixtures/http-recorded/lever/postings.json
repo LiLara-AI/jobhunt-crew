@@ -1,0 +1,30 @@
+[
+  {
+    "id": "lever-post-901",
+    "text": "Lead Platform Engineer",
+    "createdAt": 1715000000000,
+    "hostedUrl": "https://jobs.lever.co/apexcloud/lever-post-901?lever-source=linkedin",
+    "applyUrl": "https://jobs.lever.co/apexcloud/lever-post-901/apply",
+    "categories": {
+      "team": "Platform Engineering",
+      "department": "Engineering",
+      "location": "Riyadh",
+      "commitment": "Full time"
+    },
+    "descriptionPlain": "Apex Cloud Technologies is hiring a Lead Platform Engineer to design multi-region Kubernetes platforms."
+  },
+  {
+    "id": "lever-post-902",
+    "text": "Senior Backend Engineer - Cloud Services",
+    "createdAt": 1720000000000,
+    "hostedUrl": "https://jobs.lever.co/apexcloud/lever-post-902",
+    "applyUrl": "https://jobs.lever.co/apexcloud/lever-post-902/apply",
+    "categories": {
+      "team": "Core Services",
+      "department": "Engineering",
+      "location": "Jeddah",
+      "commitment": "Full time"
+    },
+    "descriptionPlain": "Build fault-tolerant cloud services in Go and Rust."
+  }
+]

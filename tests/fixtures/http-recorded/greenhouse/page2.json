@@ -1,0 +1,15 @@
+{
+  "jobs": [
+    {
+      "id": 50103,
+      "title": "Senior Reliability Engineer (SRE)",
+      "updated_at": "2026-05-10T11:00:00Z",
+      "location": { "name": "Riyadh, Saudi Arabia" },
+      "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/50103?gh_jid=50103",
+      "metadata": [
+        { "name": "Department", "value": "Reliability" }
+      ],
+      "content": "&lt;p&gt;Drive observability and high-availability operations across microservices.&lt;/p&gt;"
+    }
+  ]
+}

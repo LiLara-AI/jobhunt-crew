@@ -1,0 +1,20 @@
+{
+  "totalFound": 25,
+  "offset": 10,
+  "limit": 10,
+  "content": [
+    {
+      "id": "sr-post-2",
+      "name": "Staff Distributed Database Engineer",
+      "uuid": "sr-uuid-002",
+      "refNumber": "REF-SR-02",
+      "releasedDate": "2026-02-15T00:00:00.000Z",
+      "location": {
+        "city": "Dammam",
+        "region": "Eastern Province",
+        "country": "sa"
+      },
+      "department": { "label": "Data Platform" }
+    }
+  ]
+}
