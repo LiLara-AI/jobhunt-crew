@@ -28,7 +28,8 @@ suite.test('TC-COMPILER-01: Manifest Structure & Schema Validation', async asser
     const manifest = JSON.parse(fs.readFileSync(result.manifestPath, 'utf8'));
     assert.equal(manifest.name, 'jobhunt-crew');
     assert.ok(typeof manifest.version === 'string' && manifest.version.length > 0);
-    assert.ok(Array.isArray(manifest.suggestedPrompts) && manifest.suggestedPrompts.length >= 3);
+    assert.equal(Object.prototype.hasOwnProperty.call(manifest, 'suggestedPrompts'), false);
+    assert.ok(manifest.metadata && Array.isArray(manifest.metadata.suggestedPrompts) && manifest.metadata.suggestedPrompts.length >= 3);
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }

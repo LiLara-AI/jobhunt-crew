@@ -257,6 +257,17 @@ suite.test('2.4 formatFrontmatter: guarantees valid YAML frontmatter with zero X
   assert.ok(frontmatter.endsWith('---\n\n'), 'Must end with closing fence and double newline');
   assert.ok(!frontmatter.includes('<'), 'Frontmatter must never contain "<"');
   assert.ok(!frontmatter.includes('>'), 'Frontmatter must never contain ">"');
+
+  const quoted = ClaudePluginCompiler.formatFrontmatter({
+    name: 'quote-skill',
+    description: 'Say "hello" and path\\to\\file'
+  });
+  const quotedLine = quoted.split('\n').find((line) => line.startsWith('description:'));
+  assert.equal(
+    quotedLine,
+    'description: "Say \\"hello\\" and path\\\\to\\\\file"',
+    'Quotes and backslashes must be escaped inside the YAML double-quoted description'
+  );
 });
 
 suite.test('2.5 ClaudePluginCompiler.build: compiles complete plugin bundle with valid manifest, AGENTS.md, and skills', async () => {
