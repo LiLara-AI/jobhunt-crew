@@ -1,5 +1,6 @@
 ---
 name: critic
+model: pro
 description: "Candidate-Isolated Blind Review Panel for JobHunt Crew. Evaluates drafted CVs and cover letters from Recruiter and Hiring Manager perspectives with provable candidate de-identification. (Gemini Pro)"
 tools:
   - view_file

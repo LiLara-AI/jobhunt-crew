@@ -47,7 +47,8 @@ async function run() {
   // 2. Mandatory Directories
   const requiredDirs = [
     'bin',
-    'lib/core',
+    'lib/ledger',
+    'lib/cli/commands',
     'lib/honest-cv',
     'lib/discovery',
     'lib/command-center',
@@ -133,3 +134,12 @@ async function run() {
 }
 
 module.exports = { run };
+
+if (require.main === module) {
+  run().then(result => {
+    if (result.failed > 0) process.exitCode = 1;
+  }).catch(err => {
+    console.error(err);
+    process.exitCode = 1;
+  });
+}

@@ -422,8 +422,8 @@ suite.test('TC-PKG-04: Engine Package Completeness & Executable Permissions (0o7
       'bin/crew.js',
       'bin/crew-mcp.js',
       'lib/index.js',
-      'lib/core/ledger.js',
-      'lib/core/snapshot.js',
+      'lib/ledger/ledger.js',
+      'lib/ledger/reducer.js',
       'lib/honest-cv/dossier.js',
       'lib/honest-cv/verify-claims.js',
       'agents/dispatcher.md',
@@ -539,7 +539,7 @@ suite.test('TC-PKG-06: Full Inflate Decompression Roundtrip & File Content Parit
       'NOTICE',
       'LICENSE',
       'bin/crew.js',
-      'lib/core/ledger.js',
+      'lib/ledger/ledger.js',
       'templates/CareerDossier.example.json'
     ];
 

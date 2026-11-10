@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+<head>
+<meta charset="utf-8">
+<title>{{candidate.name}} — CV</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Calibri, Arial, sans-serif; font-size: 10.5pt; color: #1a1a1a; line-height: 1.45; margin: 0; }
+  h1 { font-size: 20pt; margin: 0 0 2px; }
+  .title { font-size: 12pt; color: #444; margin: 0 0 4px; }
+  .contact { font-size: 9.5pt; color: #555; margin: 0 0 10px; }
+  h2 { font-size: 12pt; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #999; margin: 14px 0 6px; padding-bottom: 2px; }
+  h3 { font-size: 11pt; margin: 8px 0 2px; }
+  .meta { color: #555; font-size: 9.5pt; }
+  ul { margin: 4px 0 8px; padding-inline-start: 18px; }
+  li { margin: 2px 0; }
+  section, .job { page-break-inside: avoid; }
+  [dir="rtl"] body { text-align: right; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>{{candidate.name}}</h1>
+    <p class="title">{{candidate.currentTitle}}</p>
+    <p class="contact">{{candidate.email}} · {{candidate.phone}} · {{candidate.location}}</p>
+  </header>
+  <section>
+    <h2>Summary</h2>
+    <p dir="auto">{{candidate.summary}}</p>
+  </section>
+  <section>
+    <h2>Experience</h2>
+    {{#each employers}}
+    <div class="job">
+      <h3>{{title}} — {{name}}</h3>
+      <p class="meta">{{location}}</p>
+    </div>
+    {{/each}}
+    <ul>
+      {{#each claims}}<li dir="auto">{{text}}</li>
+      {{/each}}
+    </ul>
+  </section>
+  <section>
+    <h2>Education</h2>
+    <ul>
+      {{#each degrees}}<li><strong>{{degree}}</strong>, {{institution}} ({{year}})</li>
+      {{/each}}
+    </ul>
+  </section>
+  <section>
+    <h2>Skills</h2>
+    <p>{{skills.languages}}</p>
+    <p>{{skills.frameworks}}</p>
+    <p>{{skills.infrastructure}}</p>
+    <p>{{skills.databases}}</p>
+  </section>
+</body>
+</html>

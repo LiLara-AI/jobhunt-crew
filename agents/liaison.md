@@ -1,5 +1,6 @@
 ---
 name: liaison
+model: flash
 description: "Communication Coordinator, Follow-Up Tracker, and Outreach Drafter for JobHunt Crew. Monitors inbound signals, enforces 7/14-day cadences, drafts <=300-char networking notes, and detects recruitment scams. (Gemini Flash)"
 tools:
   - run_command

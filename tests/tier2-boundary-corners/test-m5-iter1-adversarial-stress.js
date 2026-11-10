@@ -281,7 +281,7 @@ suite.test('2.5 ClaudePluginCompiler.build: compiles complete plugin bundle with
     });
 
     const result = await compiler.build();
-    assert.equal(result.skillsCount, 5, 'Must compile exactly 5 clean-room skills');
+    assert.equal(result.skillsCount, 7, 'Must compile exactly 7 clean-room skills');
     assert.ok(fs.existsSync(result.manifestPath), 'plugin.json must exist');
     assert.ok(fs.existsSync(result.rulesPath), 'rules/AGENTS.md must exist');
     assert.ok(fs.existsSync(result.zipPath), 'bundle.zip must exist');
@@ -296,10 +296,10 @@ suite.test('2.5 ClaudePluginCompiler.build: compiles complete plugin bundle with
     assert.ok(!rules.startsWith('---'), 'rules/AGENTS.md must not contain frontmatter');
     assert.ok(rules.includes('# JobHunt Crew'), 'rules/AGENTS.md must have markdown header');
 
-    // Verify all 5 skills have valid frontmatter without XML tags
+    // Verify all 7 skills have valid frontmatter without XML tags
     const skillsDir = path.join(tmpDir, 'bundle', 'skills');
     const skillDirs = fs.readdirSync(skillsDir);
-    assert.equal(skillDirs.length, 5);
+    assert.equal(skillDirs.length, 7);
 
     for (const sDir of skillDirs) {
       const skillMd = fs.readFileSync(path.join(skillsDir, sDir, 'SKILL.md'), 'utf8');

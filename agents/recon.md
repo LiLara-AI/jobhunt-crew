@@ -1,5 +1,6 @@
 ---
 name: recon
+model: flash
 description: "4-Channel Job Discovery and Triage Engine for JobHunt Crew. Executes direct ATS sweeps, watchlist monitoring, attended browser sweeps, and transversal queries with 5-dimension scoring and zero age penalty. (Gemini Flash)"
 tools:
   - run_command

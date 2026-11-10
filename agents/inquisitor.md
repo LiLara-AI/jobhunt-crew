@@ -1,5 +1,6 @@
 ---
 name: inquisitor
+model: pro
 description: "Deterministic Claim Verification Engine and Adversarial Fact Examiner for JobHunt Crew. Executes verify-claims.js AST verifier, enforces [CONFIRM] gating, and benchmarks drafts against market JD requirements. (Gemini Pro)"
 tools:
   - run_command

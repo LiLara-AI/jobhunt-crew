@@ -1,0 +1,25 @@
+{
+  "name": "jobhunt-crew",
+  "version": "0.2.0",
+  "description": "Deterministic multi-agent job search and honest CV tailoring platform with verified claims and append-only ledger.",
+  "author": {
+    "name": "JobHunt Crew Authors"
+  },
+  "license": "MIT",
+  "keywords": ["job-hunt", "cv", "claim-verification", "mcp", "agents"],
+  "mcpServers": {
+    "crew": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bin/crew-mcp.js"]
+    }
+  },
+  "metadata": {
+    "suggestedPrompts": [
+      "Set up JobHunt Crew with my resume dossier",
+      "Run job discovery sweep across target cities and boards",
+      "Tailor a claim-verified CV and apply pack for this job description",
+      "Review contract offer against Saudi Labor Law standards",
+      "Run crew doctor diagnostics to inspect ledger and connectors"
+    ]
+  }
+}

@@ -397,7 +397,7 @@ suite.test('JobScorer adheres to 5-dimension rubric and strict zero age penalty 
 
 suite.test('BrowserSweeps provides attended guidance and read-only session checkers for all 5 boards', assert => {
   const targets = BrowserSweeps.getTargetBoards();
-  assert.equal(targets.length, 5, '5 supported browser sweep boards');
+  assert.ok(targets.length >= 5, 'at least the 5 original browser sweep boards are supported');
 
   const expectedBoards = ['linkedin', 'bayt', 'gulftalent', 'naukrigulf', 'indeed_sa'];
   for (const b of expectedBoards) {

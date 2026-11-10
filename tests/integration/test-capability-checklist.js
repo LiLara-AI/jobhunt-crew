@@ -55,13 +55,18 @@ try {
 
 const suite = new TestSuite('M8 Integration: Capability Checklist & Acceptance Mapping Validator');
 
-// Determine repo root and checklist path
-let repoRoot;
-if (__dirname.includes(path.join('jobhunt-crew', 'tests'))) {
-  repoRoot = path.resolve(__dirname, '../..');
-} else {
-  repoRoot = path.resolve(__dirname, '../../../jobhunt-crew');
+// Determine repo root by walking up to the nearest package.json
+function findRepoRoot(startDir) {
+  let dir = path.resolve(startDir);
+  for (let i = 0; i < 10; i++) {
+    if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return path.resolve(startDir, '../..');
 }
+const repoRoot = findRepoRoot(__dirname);
 
 let checklistPath = process.env.CHECKLIST_PATH || path.join(repoRoot, 'docs', 'capability-checklist.md');
 if (!fs.existsSync(checklistPath)) {

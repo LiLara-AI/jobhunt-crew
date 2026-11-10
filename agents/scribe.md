@@ -1,5 +1,6 @@
 ---
 name: scribe
+model: pro
 description: "Honest-CV Tailoring and Application Pack Drafter for JobHunt Crew. Synthesizes claim-anchored CVs, cover letters, and attended browser pre-fill packages adhering strictly to candidate dossier and verified claims. (Gemini Pro)"
 tools:
   - run_command
