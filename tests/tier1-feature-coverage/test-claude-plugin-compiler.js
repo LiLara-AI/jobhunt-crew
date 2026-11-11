@@ -135,7 +135,7 @@ suite.test('TC-COMPILER-05: Clean-Room & Zip Packaging Verification', async asse
   }
 });
 
-suite.test('TC-COMPILER-06: Self-Contained Bundle (MCP entry resolves inside bundle)', async assert => {
+suite.test('TC-COMPILER-06: Self-Contained Bundle (engine ships, no bundled MCP declaration)', async assert => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-compiler-test-'));
   try {
     const compiler = new ClaudePluginCompiler({
@@ -145,10 +145,12 @@ suite.test('TC-COMPILER-06: Self-Contained Bundle (MCP entry resolves inside bun
     const bundle = path.join(tmpDir, 'bundle');
 
     const manifest = JSON.parse(fs.readFileSync(result.manifestPath, 'utf8'));
-    assert.ok(manifest.mcpServers && manifest.mcpServers.crew, 'Manifest must declare the crew MCP server');
-    const mcpArg = String(manifest.mcpServers.crew.args[0] || '');
-    const relEntry = mcpArg.replace(/^\$\{[^}]+\}\//, '');
-    assert.ok(fs.existsSync(path.join(bundle, relEntry)), `MCP entry must exist inside bundle: ${relEntry}`);
+    // Cowork's server-side marketplace validator rejects plugin-declared MCP
+    // servers without a `url` string (failed_content). The crew server is
+    // stdio-based, so the manifest must not declare it; hosts register it
+    // explicitly (claude mcp add / Desktop config / mcp_config.json).
+    assert.equal(Object.prototype.hasOwnProperty.call(manifest, 'mcpServers'), false, 'Manifest must not declare bundled MCP servers (Cowork sync validator)');
+    assert.ok(fs.existsSync(path.join(bundle, 'bin', 'crew-mcp.js')), 'MCP entry script must exist inside bundle: bin/crew-mcp.js');
     assert.ok(fs.existsSync(path.join(bundle, 'lib', 'mcp', 'server.js')), 'Bundle must include lib/mcp/server.js');
     assert.ok(fs.existsSync(path.join(bundle, 'templates')), 'Bundle must include templates/');
     assert.ok(fs.existsSync(path.join(bundle, 'mcp_config.json')), 'Bundle must include mcp_config.json');
