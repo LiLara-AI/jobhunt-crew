@@ -135,6 +135,30 @@ suite.test('TC-COMPILER-05: Clean-Room & Zip Packaging Verification', async asse
   }
 });
 
+suite.test('TC-COMPILER-06: Self-Contained Bundle (MCP entry resolves inside bundle)', async assert => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-compiler-test-'));
+  try {
+    const compiler = new ClaudePluginCompiler({
+      outDir: path.join(tmpDir, 'bundle')
+    });
+    const result = await compiler.build();
+    const bundle = path.join(tmpDir, 'bundle');
+
+    const manifest = JSON.parse(fs.readFileSync(result.manifestPath, 'utf8'));
+    assert.ok(manifest.mcpServers && manifest.mcpServers.crew, 'Manifest must declare the crew MCP server');
+    const mcpArg = String(manifest.mcpServers.crew.args[0] || '');
+    const relEntry = mcpArg.replace(/^\$\{[^}]+\}\//, '');
+    assert.ok(fs.existsSync(path.join(bundle, relEntry)), `MCP entry must exist inside bundle: ${relEntry}`);
+    assert.ok(fs.existsSync(path.join(bundle, 'lib', 'mcp', 'server.js')), 'Bundle must include lib/mcp/server.js');
+    assert.ok(fs.existsSync(path.join(bundle, 'templates')), 'Bundle must include templates/');
+    assert.ok(fs.existsSync(path.join(bundle, 'mcp_config.json')), 'Bundle must include mcp_config.json');
+    assert.ok(!fs.existsSync(path.join(bundle, '.crew')), 'Bundle must never include .crew state');
+    assert.ok(!fs.existsSync(path.join(bundle, '.pii-denylist')), 'Bundle must never include .pii-denylist');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 module.exports = suite;
 if (require.main === module) {
   suite.run({ verbose: true });
