@@ -146,6 +146,15 @@ claude plugin marketplace add LiLara-AI/jobhunt-crew
 claude plugin install jobhunt-crew@jobhunt-crew
 ```
 
+> **MCP tools are registered separately.** Cowork's marketplace validator
+> rejects plugin-bundled stdio MCP servers, so the plugin ships skills and
+> agents only. To enable the `crew_*` MCP tools in Claude Code, register the
+> bundled server once (skills also work through the `crew` CLI without it):
+>
+> ```bash
+> claude mcp add crew -- node /path/to/jobhunt-crew/bin/crew-mcp.js --workspace /path/to/jobhunt-crew
+> ```
+
 For local development, you can also build and validate the plugin bundle:
 
 ```bash
