@@ -104,7 +104,7 @@ JobHunt Crew organizes responsibilities across seven dedicated agents, assigning
 ### Initializing the Workspace
 ```bash
 # Clone the repository
-git clone https://github.com/owner/jobhunt-crew.git
+git clone https://github.com/LiLara-AI/jobhunt-crew.git
 cd jobhunt-crew
 
 # Initialize the clean-room workspace
@@ -131,7 +131,23 @@ node bin/crew.js init
 3. **Execution**: The `Dispatcher` agent activates on schedule, evaluating the event ledger and waking the crew as work appears.
 
 ### Running on Claude Code / Claude Cowork
-JobHunt Crew features complete single-source parity for Claude environments:
+This repository is a Claude plugin marketplace (`.claude-plugin/marketplace.json`).
+Install it directly from GitHub, no clone required:
+
+```
+/plugin marketplace add LiLara-AI/jobhunt-crew
+/plugin install jobhunt-crew@jobhunt-crew
+```
+
+Equivalent terminal commands:
+
+```bash
+claude plugin marketplace add LiLara-AI/jobhunt-crew
+claude plugin install jobhunt-crew@jobhunt-crew
+```
+
+For local development, you can also build and validate the plugin bundle:
+
 ```bash
 # Build the Claude plugin bundle
 node scripts/build-claude-plugin.js
