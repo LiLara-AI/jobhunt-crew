@@ -67,3 +67,12 @@ async function run() {
 }
 
 module.exports = { run };
+
+if (require.main === module) {
+  run().then(result => {
+    if (result.failed > 0) process.exitCode = 1;
+  }).catch(err => {
+    console.error(err);
+    process.exitCode = 1;
+  });
+}

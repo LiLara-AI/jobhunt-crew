@@ -1,4 +1,6 @@
 {
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
   "candidate": {
     "name": "Alex Rivera",
     "email": "alex.rivera@example.org",
@@ -17,7 +19,7 @@
   },
   "employers": [
     {
-      "id": "emp_apex",
+      "id": "emp_01",
       "name": "Apex Cloud Technologies",
       "location": "Riyadh, Saudi Arabia",
       "startYear": 2022,
@@ -26,7 +28,7 @@
       "title": "Staff Software Engineer"
     },
     {
-      "id": "emp_oasis",
+      "id": "emp_02",
       "name": "Oasis Digital Commerce",
       "location": "Dubai, UAE",
       "startYear": 2018,
@@ -37,35 +39,73 @@
   ],
   "claims": [
     {
-      "id": "ALX-001",
+      "id": "C-01",
+      "employerId": "emp_01",
       "category": "performance",
-      "employerId": "emp_apex",
       "text": "Architected event-driven microservices processing 12,000 requests per second with sub-50ms latency.",
-      "metrics": [
-        { "type": "throughput", "value": 12000, "unit": "rps" },
-        { "type": "latency", "value": 50, "unit": "ms" }
-      ],
-      "technologies": ["Node.js", "TypeScript", "Redis", "Kafka"]
+      "metrics": ["12000 rps", "50 ms"],
+      "tools": ["Node.js", "TypeScript", "Redis", "Kafka"],
+      "role": "Staff Software Engineer",
+      "status": "VERIFIED",
+      "evidence": "Production load-test report",
+      "clarificationPrompt": null,
+      "updatedAt": "2026-01-01T00:00:00.000Z"
     },
     {
-      "id": "ALX-002",
+      "id": "C-02",
+      "employerId": "emp_01",
       "category": "leadership",
-      "employerId": "emp_apex",
       "text": "Mentored 6 junior and mid-level engineers, establishing engineering quality standards and automated CI/CD pipelines.",
-      "metrics": [
-        { "type": "count", "value": 6, "unit": "engineers" }
-      ],
-      "technologies": ["GitHub Actions", "Docker", "Kubernetes"]
+      "metrics": ["6 engineers"],
+      "tools": ["GitHub Actions", "Docker", "Kubernetes"],
+      "role": "Staff Software Engineer",
+      "status": "VERIFIED",
+      "evidence": "Team roster and review records",
+      "clarificationPrompt": null,
+      "updatedAt": "2026-01-01T00:00:00.000Z"
     },
     {
-      "id": "ALX-003",
+      "id": "C-03",
+      "employerId": "emp_02",
       "category": "cost_optimization",
-      "employerId": "emp_oasis",
       "text": "Reduced cloud infrastructure expenditures by 28% through autoscaling optimization and caching strategies.",
-      "metrics": [
-        { "type": "percentage", "value": 28, "unit": "percent" }
-      ],
-      "technologies": ["AWS", "Terraform", "CloudFront"]
+      "metrics": ["28 %"],
+      "tools": ["AWS", "Terraform", "CloudFront"],
+      "role": "Senior Backend Engineer",
+      "status": "VERIFIED",
+      "evidence": "Cloud billing comparison",
+      "clarificationPrompt": null,
+      "updatedAt": "2026-01-01T00:00:00.000Z"
     }
-  ]
+  ],
+  "degrees": [
+    { "degree": "B.Sc. Computer Science", "institution": "Example University", "year": 2015 }
+  ],
+  "certifications": [
+    { "name": "AWS Certified Solutions Architect", "issuer": "Amazon Web Services", "year": 2023 }
+  ],
+  "skills": {
+    "languages": ["TypeScript", "JavaScript", "Python"],
+    "frameworks": ["Node.js", "Express"],
+    "infrastructure": ["AWS", "Docker", "Kubernetes", "Terraform"],
+    "databases": ["PostgreSQL", "Redis"],
+    "architecturalDomains": ["Distributed Systems", "Event-Driven Architecture"]
+  },
+  "preferences": {
+    "targetTitles": ["Staff Software Engineer"],
+    "targetLocations": ["Riyadh"],
+    "knockouts": {
+      "excludedIndustries": [],
+      "excludedSubIndustries": [],
+      "excludedCompanies": [],
+      "seniorityFloor": ""
+    },
+    "jobBoards": [],
+    "schedule": { "startHour": 8, "timezone": "Asia/Riyadh", "autoPrep": false }
+  },
+  "claimVerificationAppendix": {
+    "verifiedCount": 3,
+    "pendingCount": 0,
+    "verificationLog": []
+  }
 }

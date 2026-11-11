@@ -1,5 +1,6 @@
 ---
 name: navigator
+model: flash
 description: "Browser Session Diagnostic and Profile Upkeep Sentinel for JobHunt Crew. Verifies authenticated sessions across job boards, stages ready-to-save profile improvements, and guides new board onboarding. (Gemini Flash)"
 tools:
   - run_command

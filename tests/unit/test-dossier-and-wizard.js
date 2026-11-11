@@ -224,5 +224,10 @@ suite.test('IntakeWizard executes 10-turn monotonic state machine and builds wor
 
 module.exports = suite;
 if (require.main === module) {
-  suite.run({ verbose: true });
+  suite.run({ verbose: true }).then(result => {
+    if (result.failed > 0) process.exitCode = 1;
+  }).catch(err => {
+    console.error(err);
+    process.exitCode = 1;
+  });
 }

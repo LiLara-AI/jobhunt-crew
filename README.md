@@ -126,7 +126,7 @@ node bin/crew.js init
    ```
 2. **Generate Scheduled Task Sidecars**:
    ```bash
-   node scripts/setup-antigravity-tasks.js --install-sidecars --timezone Asia/Riyadh --hour 8
+   node lib/setup-antigravity-tasks.js --install-sidecars --timezone Asia/Riyadh --hour 8
    ```
 3. **Execution**: The `Dispatcher` agent activates on schedule, evaluating the event ledger and waking the crew as work appears.
 

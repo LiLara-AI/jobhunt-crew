@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "crew": {
+      "command": "node",
+      "args": ["${PLUGIN_ROOT}/bin/crew-mcp.js"]
+    }
+  }
+}

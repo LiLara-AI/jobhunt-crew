@@ -1,0 +1,31 @@
+# Apply Pack — {{candidate.name}} → {{company.name}}
+
+- **Role**: {{job.title}}
+- **Company**: {{company.name}}
+- **Candidate**: {{candidate.name}} ({{candidate.currentTitle}})
+- **Contact**: {{candidate.email}} · {{candidate.phone}} · {{candidate.location}}
+- **Status**: ready-to-submit (human review required — never auto-submit)
+
+## Tailored Summary
+
+{{candidate.summary}}
+
+## Selected Verified Claims
+
+{{#each claims}}- [{{id}}] {{text}}
+{{/each}}
+
+## Cover Letter
+
+{{coverLetter}}
+
+## Form Answers
+
+{{formAnswers}}
+
+## Checklist
+
+- [ ] Every claim above is VERIFIED in the dossier (no [CONFIRM])
+- [ ] CV + cover letter rendered (DOCX/PDF) and proofread
+- [ ] Salary fields handled per disclosure policy: {{candidate.salaryFloor.disclosurePolicy}}
+- [ ] Human clicked submit (APPLICATION_SUBMITTED requires human actor + auth token)

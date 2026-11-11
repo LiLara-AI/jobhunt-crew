@@ -5,6 +5,10 @@
  * applying active rules to subsequent drafts, and clean undo behavior.
  */
 
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
 const { TestSuite } = require('../helpers/test-harness');
 
 const { EditorialRuleEngine } = require('../../lib/honest-cv/editorial-rules');
@@ -12,7 +16,8 @@ const { EditorialRuleEngine } = require('../../lib/honest-cv/editorial-rules');
 const suite = new TestSuite('Tier 3: Self-Learning Editorial Rules');
 
 suite.test('Editorial rule learned from user correction applies to subsequent text', assert => {
-  const engine = new EditorialRuleEngine();
+  const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-ed-'));
+  const engine = new EditorialRuleEngine({ workspaceDir });
 
   // User corrects buzzword 'synergized cross-team efforts' to 'orchestrated multi-squad architecture reviews'
   engine.learnRuleFromCorrection(
@@ -30,7 +35,8 @@ suite.test('Editorial rule learned from user correction applies to subsequent te
 });
 
 suite.test('Undoing an editorial rule cleanly restores original drafting behavior', assert => {
-  const engine = new EditorialRuleEngine();
+  const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-ed-'));
+  const engine = new EditorialRuleEngine({ workspaceDir });
 
   engine.learnRuleFromCorrection(
     'rule_02',

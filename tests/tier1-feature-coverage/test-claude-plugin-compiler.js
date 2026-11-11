@@ -4,7 +4,7 @@
  * Tier 1: Feature Coverage — Claude Code / Cowork Plugin Compiler
  *
  * Verifies manifest schema, zero-XML YAML frontmatter enforcement,
- * the 5 modular skill packages, frontmatter-free operating rules,
+ * the 7 modular skill packages, frontmatter-free operating rules,
  * clean-room compliance, and zip packaging.
  */
 
@@ -68,16 +68,16 @@ suite.test('TC-COMPILER-02: Frontmatter XML Tag Rejection (Zero Angle Brackets)'
   }
 });
 
-suite.test('TC-COMPILER-03: 5 Clean-Room Skill Packages Completeness', async assert => {
+suite.test('TC-COMPILER-03: 7 Clean-Room Skill Packages Completeness', async assert => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-compiler-test-'));
   try {
     const compiler = new ClaudePluginCompiler({
       outDir: path.join(tmpDir, 'bundle')
     });
     const result = await compiler.build();
-    assert.equal(result.skillsCount, 5, 'Must compile exactly 5 skills');
+    assert.equal(result.skillsCount, 7, 'Must compile exactly 7 skills');
 
-    const expectedSkills = ['setup', 'honest-cv', 'contacto', 'interview-prep', 'offer-review'];
+    const expectedSkills = ['setup', 'update', 'honest-cv', 'apply-multi-vacancy', 'contacto', 'interview-prep', 'offer-review'];
     for (const name of expectedSkills) {
       const skillPath = path.join(tmpDir, 'bundle', 'skills', name, 'SKILL.md');
       assert.ok(fs.existsSync(skillPath), `Skill file must exist: ${name}/SKILL.md`);

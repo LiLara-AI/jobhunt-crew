@@ -17,6 +17,8 @@
  */
 
 const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { execSync } = require('child_process');
 const { ClaimVerifier, extractEntities } = require('../../lib/honest-cv/verify-claims');
@@ -24,6 +26,7 @@ const { EditorialRuleEngine } = require('../../lib/honest-cv/editorial-rules');
 const { corpus, dossiers } = require('../fixtures/golden-corpus/corpus');
 
 const ROOT_DIR = path.resolve(__dirname, '../..');
+const editorialWorkspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-ed-'));
 const morganDossier = dossiers['morgan-vance'];
 const alexDossier = dossiers['alex-rivera'];
 
@@ -281,7 +284,7 @@ const editorialInjectionProbes = [
 
 for (const p of editorialInjectionProbes) {
   runProbe(`Editorial Guard: ${p.label}`, () => {
-    const engine = new EditorialRuleEngine({ autoLoad: false });
+    const engine = new EditorialRuleEngine({ workspaceDir: editorialWorkspaceDir, autoLoad: false });
     engine.learnRuleFromCorrection(p.ruleId, p.from, p.to, 'adversarial-probe');
 
     const baseSentence = `Reduced event latency to ${p.from} using CKA and Ph.D. in consensus protocol at Apex Cloud Technologies.`;

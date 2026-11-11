@@ -1,5 +1,6 @@
 ---
 name: dispatcher
+model: flash
 description: "Work-state waking controller, cadence enforcer, and daily briefing coordinator for JobHunt Crew. Inspects .crew/snapshot.json to trigger only agents with active workloads. (Gemini Flash)"
 tools:
   - run_command
