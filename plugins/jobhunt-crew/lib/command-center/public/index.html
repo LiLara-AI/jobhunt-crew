@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobHunt Crew — Command Center</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="app-shell">
+
+  <!-- Top Navigation Bar -->
+  <header class="top-nav">
+    <div class="brand-group">
+      <a href="#" class="brand-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path>
+          <path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path>
+          <circle cx="8" cy="12" r="2"></circle>
+        </svg>
+        <span>JobHunt Crew</span>
+      </a>
+      <span class="version-tag">v0.1.0</span>
+    </div>
+
+    <!-- 5 Modern View Pills -->
+    <nav class="nav-pills" role="tablist" aria-label="Command Center Views">
+      <button class="nav-pill active" id="tab-decision-queue" data-view="decision-queue" role="tab" aria-selected="true">
+        <span>Decision Queue</span>
+        <span class="badge" id="badge-decisions-count">0</span>
+      </button>
+      <button class="nav-pill" id="tab-pipeline-board" data-view="pipeline-board" role="tab" aria-selected="false">
+        <span>Pipeline Board</span>
+      </button>
+      <button class="nav-pill" id="tab-workbench" data-view="workbench" role="tab" aria-selected="false">
+        <span>Workbench</span>
+      </button>
+      <button class="nav-pill" id="tab-evidence-map" data-view="evidence-map" role="tab" aria-selected="false">
+        <span>Evidence Map</span>
+      </button>
+      <button class="nav-pill" id="tab-runs-timeline" data-view="runs-timeline" role="tab" aria-selected="false">
+        <span>Runs Timeline</span>
+      </button>
+    </nav>
+
+    <!-- Header Actions (Sync Status, Export, Theme) -->
+    <div class="header-actions">
+      <div class="sync-indicator" id="sync-status" title="Connected to local 127.0.0.1 ledger">
+        <span class="pulse-dot"></span>
+        <span class="sync-label" id="sync-label">Sync</span>
+      </div>
+      <a href="/api/export" class="btn btn-secondary btn-sm" id="btn-export-html" download="jobhunt-crew-export.html" title="Download standalone offline single-file HTML">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Export</span>
+      </a>
+      <button class="theme-toggle" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
+        <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="main-content" id="view-container">
+    <!-- View 1: Decision Queue -->
+    <section class="view-panel active" id="view-decision-queue" role="tabpanel" aria-labelledby="tab-decision-queue">
+      <div class="view-header">
+        <div>
+          <h2>Decision Queue</h2>
+          <p class="view-subtitle">Actionable items requiring human judgment and authorization.</p>
+        </div>
+      </div>
+      <div class="decision-cards-grid" id="decision-cards-container">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="excluded-roles-section" id="excluded-roles-section" style="margin-top: 32px;">
+        <!-- Collapsible parked roles & undo list -->
+      </div>
+    </section>
+
+    <!-- View 2: Pipeline Board -->
+    <section class="view-panel" id="view-pipeline-board" role="tabpanel" aria-labelledby="tab-pipeline-board">
+      <div class="view-header">
+        <div>
+          <h2>Pipeline Board</h2>
+          <p class="view-subtitle">Lifecycle flow across all discovered opportunities.</p>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="filter-search" placeholder="Search title or company...">
+        <select id="filter-channel">
+          <option value="all">All Channels</option>
+          <option value="workday">Workday</option>
+          <option value="greenhouse">Greenhouse</option>
+          <option value="lever">Lever</option>
+          <option value="ashby">Ashby</option>
+          <option value="smartrecruiters">SmartRecruiters</option>
+          <option value="oracle">Oracle HCM</option>
+          <option value="linkedin">LinkedIn</option>
+        </select>
+        <select id="filter-min-score">
+          <option value="0">All Scores</option>
+          <option value="3.5">Score &ge; 3.5</option>
+          <option value="4.0">Score &ge; 4.0</option>
+          <option value="4.5">Score &ge; 4.5</option>
+        </select>
+      </div>
+      <div class="kanban-board" id="pipeline-kanban-container">
+        <!-- 8 Columns rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- View 3: Workbench -->
+    <section class="view-panel" id="view-workbench" role="tabpanel" aria-labelledby="tab-workbench">
+      <div class="view-header">
+        <div>
+          <h2>Workbench</h2>
+          <p class="view-subtitle">Tailored CV & Cover Letter drafting studio with claim citations.</p>
+        </div>
+      </div>
+      <div class="workbench-layout" id="workbench-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- View 4: Evidence Map -->
+    <section class="view-panel" id="view-evidence-map" role="tabpanel" aria-labelledby="tab-evidence-map">
+      <div class="view-header">
+        <div>
+          <h2>Evidence Map</h2>
+          <p class="view-subtitle">Candidate verified claims vs job requirements coverage matrix.</p>
+        </div>
+      </div>
+      <div id="evidence-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- View 5: Runs Timeline -->
+    <section class="view-panel" id="view-runs-timeline" role="tabpanel" aria-labelledby="tab-runs-timeline">
+      <div class="view-header">
+        <div>
+          <h2>Runs Timeline</h2>
+          <p class="view-subtitle">Audit stream of agent crew execution and ledger events.</p>
+        </div>
+      </div>
+      <div class="agent-grid" id="agent-grid-container">
+        <!-- 7 Agent cards rendered dynamically -->
+      </div>
+      <div class="timeline-feed" id="timeline-container">
+        <!-- Events feed rendered dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Slide-Over Job Inspector Drawer -->
+  <aside class="slide-drawer" id="job-drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 id="drawer-job-title">Job Details</h3>
+      <button class="btn btn-secondary btn-sm" id="btn-close-drawer">✕ Close</button>
+    </div>
+    <div id="drawer-content"></div>
+  </aside>
+
+  <!-- Human Submission Confirmation Modal -->
+  <div class="modal-backdrop" id="submit-modal">
+    <div class="modal-dialog">
+      <h3>Confirm Application Submission</h3>
+      <p style="margin: 12px 0; color: var(--text-secondary); font-size: 0.9rem;">
+        Guardrail Warning: Automated agents are strictly forbidden from submitting applications.
+        Only a verified human user can authorize this action.
+      </p>
+      <div style="margin: 16px 0;">
+        <label style="display:block; font-size: 0.85rem; font-weight:600; margin-bottom:6px;">Human Authorization Token:</label>
+        <input type="text" id="modal-submit-token" placeholder="Enter human authorization token..." style="width:100%; padding:8px 12px; background:var(--bg-surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); color:var(--text-primary);">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
+        <button class="btn btn-success" id="btn-modal-confirm-submit">✓ Confirm & Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

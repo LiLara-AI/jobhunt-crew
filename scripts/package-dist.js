@@ -332,6 +332,7 @@ const ENGINE_TARGETS = [
   'mcp_config.json',
   'gemini-extension.json',
   'templates',
+  'plugins',
   'scripts',
   'docs',
   'gemini-desktop-pack',

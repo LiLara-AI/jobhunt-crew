@@ -1,0 +1,63 @@
+{
+  "name": "jobhunt-crew",
+  "version": "0.2.0",
+  "description": "Deterministic multi-agent job hunt automation and honest CV tailoring platform with verified claims and append-only ledger",
+  "author": "JobHunt Crew Authors",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "lib/index.js",
+  "bin": {
+    "crew": "./bin/crew.js",
+    "crew-mcp": "./bin/crew-mcp.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "agents",
+    "skills",
+    "templates",
+    "plugins",
+    "scripts",
+    "plugin.json",
+    "mcp_config.json",
+    ".claude-plugin",
+    "gemini-extension.json",
+    "rules",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node tests/e2e-runner.js",
+    "test:unit": "node --test \"tests/unit/*.test.js\" \"tests/unit/test-*.js\"",
+    "test:all": "node scripts/verify-clean-room.js && node scripts/verify-zero-pii.js && node scripts/check-forbidden-tokens.js && node scripts/package-dist.js --verify && node tests/e2e-runner.js",
+    "test:clean-room": "node scripts/verify-clean-room.js",
+    "test:pii": "node scripts/verify-zero-pii.js",
+    "test:forbidden": "node scripts/check-forbidden-tokens.js",
+    "verify:clean-room": "node scripts/verify-clean-room.js",
+    "verify:pii": "node scripts/verify-zero-pii.js",
+    "check:tokens": "node scripts/check-forbidden-tokens.js",
+    "clean-room": "node scripts/verify-clean-room.js",
+    "zero-pii": "node scripts/verify-zero-pii.js",
+    "package": "node scripts/package-dist.js",
+    "package:verify": "node scripts/package-dist.js --verify",
+    "verify:package": "node scripts/package-dist.js --verify",
+    "lint": "node scripts/lint.js",
+    "doctor": "node bin/crew.js doctor",
+    "pii-init": "node scripts/verify-zero-pii.js --init"
+  },
+  "keywords": [
+    "job-hunt",
+    "ai-agents",
+    "honest-cv",
+    "claim-verification",
+    "event-ledger",
+    "clean-room",
+    "mcp-server"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

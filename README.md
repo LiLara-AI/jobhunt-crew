@@ -165,6 +165,12 @@ node scripts/build-claude-plugin.js
 claude plugin validate --strict dist/claude-plugin
 ```
 
+The marketplace installs the plugin from `plugins/jobhunt-crew/`, a committed
+compiler-generated bundle (Claude-normalized agents, no bundled MCP
+declaration). After changing skills, agents, or engine code, regenerate it
+with `node scripts/build-claude-plugin.js --out plugins/jobhunt-crew` and
+commit the result — `tests/unit/committed-bundle.test.js` fails on drift.
+
 ---
 
 ## 5. Gemini Desktop Companion Edition

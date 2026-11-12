@@ -1,21 +1,20 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "jobhunt-crew",
-  "description": "Marketplace catalog for JobHunt Crew, a local multi-agent job search plugin with claim-verified CV tailoring.",
   "owner": {
-    "name": "JobHunt Crew Authors",
-    "url": "https://github.com/LiLara-AI"
+    "name": "JobHunt Crew Authors"
+  },
+  "metadata": {
+    "description": "Marketplace catalog for JobHunt Crew, a local multi-agent job search plugin with claim-verified CV tailoring."
   },
   "plugins": [
     {
       "name": "jobhunt-crew",
+      "source": "./plugins/jobhunt-crew",
       "description": "Deterministic multi-agent job search and honest CV tailoring platform with verified claims and append-only ledger.",
       "version": "0.2.0",
-      "source": "./",
       "author": {
         "name": "JobHunt Crew Authors"
       },
-      "category": "productivity",
       "keywords": ["job-hunt", "cv", "claim-verification", "mcp", "agents"]
     }
   ]
