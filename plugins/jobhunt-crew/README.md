@@ -136,14 +136,14 @@ Install it directly from GitHub, no clone required:
 
 ```
 /plugin marketplace add LiLara-AI/jobhunt-crew
-/plugin install jobhunt-crew@jobhunt-crew
+/plugin install jobhunt-crew@lilara-jobhunt
 ```
 
 Equivalent terminal commands:
 
 ```bash
 claude plugin marketplace add LiLara-AI/jobhunt-crew
-claude plugin install jobhunt-crew@jobhunt-crew
+claude plugin install jobhunt-crew@lilara-jobhunt
 ```
 
 > **MCP tools are registered separately.** Cowork's marketplace validator

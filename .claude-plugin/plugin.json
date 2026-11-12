@@ -1,6 +1,6 @@
 {
   "name": "jobhunt-crew",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Deterministic multi-agent job search and honest CV tailoring platform with verified claims and append-only ledger.",
   "author": {
     "name": "JobHunt Crew Authors"
