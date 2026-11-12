@@ -1,7 +1,7 @@
 {
   "name": "jobhunt-crew",
   "description": "Local multi-agent job search crew: discovery, claim-verified CV tailoring, blind review, interview prep, and offer checks. State stays in local files and submission stays human-only.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "JobHunt Crew Authors",
   "license": "MIT",
   "contextFileName": "rules/AGENTS.md",
