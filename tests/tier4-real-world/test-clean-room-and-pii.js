@@ -23,7 +23,10 @@ suite.test('Clean-room scanner executes and passes with 0 shingle violations (ex
   }
 
   try {
-    const cmd = `node "${checkerPath}" scan "${workspaceRoot}" --json`;
+    // Run the sanctioned wrapper: it deduplicates generated-bundle copies
+    // (plugins/jobhunt-crew) that are byte-identical to scanned sources.
+    const wrapperPath = path.join(workspaceRoot, 'scripts', 'verify-clean-room.js');
+    const cmd = `node "${wrapperPath}" --json`;
     const stdout = execSync(cmd, { encoding: 'utf8', cwd: repoRoot });
     const result = JSON.parse(stdout);
 

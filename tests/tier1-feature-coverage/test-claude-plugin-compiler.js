@@ -29,7 +29,7 @@ suite.test('TC-COMPILER-01: Manifest Structure & Schema Validation', async asser
     assert.equal(manifest.name, 'jobhunt-crew');
     assert.ok(typeof manifest.version === 'string' && manifest.version.length > 0);
     assert.equal(Object.prototype.hasOwnProperty.call(manifest, 'suggestedPrompts'), false);
-    assert.ok(manifest.metadata && Array.isArray(manifest.metadata.suggestedPrompts) && manifest.metadata.suggestedPrompts.length >= 3);
+    assert.equal(Object.prototype.hasOwnProperty.call(manifest, 'metadata'), false, 'Minimal manifest only (Cowork sync validator parity with known-passing plugins)');
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
@@ -153,9 +153,47 @@ suite.test('TC-COMPILER-06: Self-Contained Bundle (engine ships, no bundled MCP 
     assert.ok(fs.existsSync(path.join(bundle, 'bin', 'crew-mcp.js')), 'MCP entry script must exist inside bundle: bin/crew-mcp.js');
     assert.ok(fs.existsSync(path.join(bundle, 'lib', 'mcp', 'server.js')), 'Bundle must include lib/mcp/server.js');
     assert.ok(fs.existsSync(path.join(bundle, 'templates')), 'Bundle must include templates/');
-    assert.ok(fs.existsSync(path.join(bundle, 'mcp_config.json')), 'Bundle must include mcp_config.json');
+    assert.ok(!fs.existsSync(path.join(bundle, 'mcp_config.json')), 'Bundle must not ship mcp_config.json (stdio MCP declaration fails Cowork sync validation)');
+    assert.ok(!fs.existsSync(path.join(bundle, 'gemini-extension.json')), 'Bundle must not ship gemini-extension.json (stdio MCP declaration)');
+    const jsonFiles = [];
+    const walk = (dir) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (e.name.endsWith('.json')) jsonFiles.push(p);
+      }
+    };
+    walk(bundle);
+    for (const jf of jsonFiles) {
+      assert.ok(!fs.readFileSync(jf, 'utf8').includes('"mcpServers"'), `No bundle JSON may declare mcpServers: ${path.relative(bundle, jf)}`);
+    }
     assert.ok(!fs.existsSync(path.join(bundle, '.crew')), 'Bundle must never include .crew state');
     assert.ok(!fs.existsSync(path.join(bundle, '.pii-denylist')), 'Bundle must never include .pii-denylist');
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+suite.test('TC-COMPILER-07: Bundle Agents Normalized for Claude (source untouched)', async assert => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-compiler-test-'));
+  try {
+    const compiler = new ClaudePluginCompiler({
+      outDir: path.join(tmpDir, 'bundle')
+    });
+    await compiler.build();
+    const bundleAgents = path.join(tmpDir, 'bundle', 'agents');
+    const files = fs.readdirSync(bundleAgents).filter(f => f.endsWith('.md'));
+    assert.equal(files.length, 8, 'Bundle must contain all 8 agents');
+    for (const f of files) {
+      const content = fs.readFileSync(path.join(bundleAgents, f), 'utf8');
+      const fm = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      assert.ok(fm !== null, `Bundle agent ${f} must keep frontmatter`);
+      assert.ok(/^model: inherit$/m.test(fm[1]), `Bundle agent ${f} model must be inherit`);
+      assert.ok(!/^tools:/m.test(fm[1]), `Bundle agent ${f} must not carry a foreign tools list`);
+      assert.ok(!/mainAgent|commandExecutionPolicy/.test(fm[1]), `Bundle agent ${f} must not carry host-specific keys`);
+    }
+    const srcDispatcher = fs.readFileSync(path.join(__dirname, '..', '..', 'agents', 'dispatcher.md'), 'utf8');
+    assert.ok(/^model: flash$/m.test(srcDispatcher), 'Source agent keeps native model routing');
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }

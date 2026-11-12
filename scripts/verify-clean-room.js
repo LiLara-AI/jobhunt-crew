@@ -153,6 +153,34 @@ function main() {
     process.exit(exitCode !== 0 ? exitCode : 2);
   }
 
+  // Generated-bundle duplicates: plugins/jobhunt-crew/ is compiler output
+  // whose files are byte-identical copies of sources the checker already
+  // scanned (freshness enforced by tests/unit/committed-bundle.test.js).
+  // Counting their tolerance shingles twice would fail the total threshold
+  // without any new provenance risk, so identical copies are excluded.
+  const crypto = require('crypto');
+  const hashOf = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+  let excludedDuplicates = 0;
+  if (Array.isArray(result.matches)) {
+    result.matches = result.matches.filter((match) => {
+      const rel = String(match.file || '').replace(/\\/g, '/');
+      const prefix = 'plugins/jobhunt-crew/';
+      if (!rel.startsWith(prefix)) return true;
+      const canonicalRel = rel.slice(prefix.length);
+      const dupPath = path.join(targetDir, ...rel.split('/'));
+      const canonicalPath = path.join(targetDir, ...canonicalRel.split('/'));
+      const isIdenticalCopy = fs.existsSync(canonicalPath) && fs.existsSync(dupPath)
+        && hashOf(canonicalPath) === hashOf(dupPath);
+      if (isIdenticalCopy) { excludedDuplicates++; return false; }
+      return true;
+    });
+    result.sharedShingles = result.matches.reduce((sum, m) => sum + (m.sharedShingles || 0), 0);
+    result.filesWithMatches = result.matches.length;
+    result.pass = result.sharedShingles <= result.limits.maxTotal
+      && result.matches.every((m) => (m.sharedShingles || 0) <= result.limits.maxPerFile);
+    result.excludedBundleDuplicates = excludedDuplicates;
+  }
+
   if (isJson) {
     console.log(JSON.stringify(result, null, 2));
     process.exit(result.pass ? 0 : 1);
@@ -166,6 +194,9 @@ function main() {
   console.log(`Files Scanned    : ${result.filesScanned}`);
   console.log(`Shared Shingles  : ${result.sharedShingles} (Threshold: <= ${result.limits.maxTotal} total, <= ${result.limits.maxPerFile} per file)`);
   console.log(`Files with Hits  : ${result.filesWithMatches}`);
+  if (result.excludedBundleDuplicates) {
+    console.log(`Bundle Duplicates: ${result.excludedBundleDuplicates} generated copy(ies) excluded (byte-identical to scanned sources)`);
+  }
 
   if (result.matches && result.matches.length > 0) {
     console.log('----------------------------------------------------------------------');

@@ -16,6 +16,7 @@
     "agents",
     "skills",
     "templates",
+    "plugins",
     "scripts",
     "plugin.json",
     "mcp_config.json",

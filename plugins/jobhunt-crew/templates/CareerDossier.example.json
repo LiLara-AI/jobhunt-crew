@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "candidate": {
+    "name": "Alex Rivera",
+    "email": "alex.rivera@example.org",
+    "phone": "+966 55 111 2222",
+    "location": "Riyadh, Saudi Arabia",
+    "workAuthorization": "Saudi National",
+    "noticePeriodDays": 30,
+    "currentTitle": "Staff Software Engineer",
+    "summary": "Full-stack engineer with 9 years of experience specializing in distributed systems, TypeScript, Node.js, and cloud architectures.",
+    "salaryFloor": {
+      "currency": "SAR",
+      "minimumBase": 35000,
+      "targetTotal": 45000,
+      "disclosurePolicy": "negotiable_placeholder"
+    }
+  },
+  "employers": [
+    {
+      "id": "emp_01",
+      "name": "Apex Cloud Technologies",
+      "location": "Riyadh, Saudi Arabia",
+      "startYear": 2022,
+      "endYear": null,
+      "isCurrent": true,
+      "title": "Staff Software Engineer"
+    },
+    {
+      "id": "emp_02",
+      "name": "Oasis Digital Commerce",
+      "location": "Dubai, UAE",
+      "startYear": 2018,
+      "endYear": 2022,
+      "isCurrent": false,
+      "title": "Senior Backend Engineer"
+    }
+  ],
+  "claims": [
+    {
+      "id": "C-01",
+      "employerId": "emp_01",
+      "category": "performance",
+      "text": "Architected event-driven microservices processing 12,000 requests per second with sub-50ms latency.",
+      "metrics": ["12000 rps", "50 ms"],
+      "tools": ["Node.js", "TypeScript", "Redis", "Kafka"],
+      "role": "Staff Software Engineer",
+      "status": "VERIFIED",
+      "evidence": "Production load-test report",
+      "clarificationPrompt": null,
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "C-02",
+      "employerId": "emp_01",
+      "category": "leadership",
+      "text": "Mentored 6 junior and mid-level engineers, establishing engineering quality standards and automated CI/CD pipelines.",
+      "metrics": ["6 engineers"],
+      "tools": ["GitHub Actions", "Docker", "Kubernetes"],
+      "role": "Staff Software Engineer",
+      "status": "VERIFIED",
+      "evidence": "Team roster and review records",
+      "clarificationPrompt": null,
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "C-03",
+      "employerId": "emp_02",
+      "category": "cost_optimization",
+      "text": "Reduced cloud infrastructure expenditures by 28% through autoscaling optimization and caching strategies.",
+      "metrics": ["28 %"],
+      "tools": ["AWS", "Terraform", "CloudFront"],
+      "role": "Senior Backend Engineer",
+      "status": "VERIFIED",
+      "evidence": "Cloud billing comparison",
+      "clarificationPrompt": null,
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "degrees": [
+    { "degree": "B.Sc. Computer Science", "institution": "Example University", "year": 2015 }
+  ],
+  "certifications": [
+    { "name": "AWS Certified Solutions Architect", "issuer": "Amazon Web Services", "year": 2023 }
+  ],
+  "skills": {
+    "languages": ["TypeScript", "JavaScript", "Python"],
+    "frameworks": ["Node.js", "Express"],
+    "infrastructure": ["AWS", "Docker", "Kubernetes", "Terraform"],
+    "databases": ["PostgreSQL", "Redis"],
+    "architecturalDomains": ["Distributed Systems", "Event-Driven Architecture"]
+  },
+  "preferences": {
+    "targetTitles": ["Staff Software Engineer"],
+    "targetLocations": ["Riyadh"],
+    "knockouts": {
+      "excludedIndustries": [],
+      "excludedSubIndustries": [],
+      "excludedCompanies": [],
+      "seniorityFloor": ""
+    },
+    "jobBoards": [],
+    "schedule": { "startHour": 8, "timezone": "Asia/Riyadh", "autoPrep": false }
+  },
+  "claimVerificationAppendix": {
+    "verifiedCount": 3,
+    "pendingCount": 0,
+    "verificationLog": []
+  }
+}

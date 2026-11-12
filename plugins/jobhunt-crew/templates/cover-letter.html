@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+<head>
+<meta charset="utf-8">
+<title>{{candidate.name}} — Cover Letter</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.55; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2px; }
+  .contact { font-size: 9.5pt; color: #555; margin: 0 0 18px; }
+  p { margin: 0 0 10px; }
+  .date, .addressee { color: #333; }
+  .signoff { margin-top: 18px; }
+  [dir="rtl"] body { text-align: right; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>{{candidate.name}}</h1>
+    <p class="contact">{{candidate.email}} · {{candidate.phone}} · {{candidate.location}}</p>
+  </header>
+  <p class="date">{{date}}</p>
+  <p class="addressee" dir="auto">{{company.name}}</p>
+  <p dir="auto">Dear {{recipient}},</p>
+  <p dir="auto">{{opening}}</p>
+  <p dir="auto">{{body}}</p>
+  <ul>
+    {{#each claims}}<li dir="auto">{{text}}</li>
+    {{/each}}
+  </ul>
+  <p dir="auto">{{closing}}</p>
+  <p class="signoff" dir="auto">{{signoff}}<br>{{candidate.name}}</p>
+</body>
+</html>
