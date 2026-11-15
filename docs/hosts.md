@@ -14,7 +14,7 @@ Use absolute paths. On Windows, use forward slashes or escaped backslashes in JS
 | Claude Cowork | plugin | CLI bridge (built in, nothing to set up) |
 | Claude Desktop chat | — | MCP via `claude_desktop_config.json` |
 | Codex (ChatGPT plan, CLI/IDE/app) | `AGENTS.md` | MCP via `~/.codex/config.toml` |
-| ChatGPT (web/desktop chat) | — | MCP over HTTPS (developer mode connector) |
+| ChatGPT (web/desktop chat) | — | MCP over HTTPS (Plugins → Add custom MCP server) |
 | Kimi Code CLI | `--skills-dir` | CLI bridge (no setup) |
 | Gemini CLI | extension | MCP via `gemini-extension.json` |
 
@@ -100,14 +100,20 @@ HTTP mode and publish it through a tunnel.
    cloudflared tunnel --url http://127.0.0.1:8787
    ```
 
-3. In ChatGPT, turn on developer mode (Settings → Apps & Connectors → Advanced),
-   create a connector, use `https://<tunnel-host>/mcp/<token>` as the URL, and
-   choose no authentication. The token in the path is the access control:
-   anyone with the full URL can read and write your job-hunt data, so do not
-   share it, and stop the tunnel when you are done.
+3. In ChatGPT open **Plugins → Add → Add custom MCP server**. Set the
+   connection to **Server URL** `https://<tunnel-host>/mcp/<token>`,
+   authentication to **No authentication**, tick the risk acknowledgment, and
+   choose **Create as a plugin**, then **Connect**. In a chat, type
+   `@<plugin name>` and ask for a tool, e.g. "call crew_doctor".
 
-Plan limits and menu names change often; check OpenAI's current help pages if
-the options above are missing. Some plans only allow read-only connectors.
+   The token in the path is the access control: anyone with the full URL can
+   read and write your job-hunt data, so do not share it, and stop the tunnel
+   when you are done. To remove it later: Settings → Plugins → your plugin →
+   Delete app.
+
+Verified on a ChatGPT Plus account (November 2026): ChatGPT ran the MCP
+handshake and called `crew_doctor` and `crew_get_snapshot`. The dialog also
+offers a built-in **Tunnel** option, not tested here.
 
 ## Kimi Code CLI
 
