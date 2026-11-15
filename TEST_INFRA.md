@@ -1,6 +1,6 @@
 # Test Infrastructure Specification: JobHunt Crew
 
-**Target Workspace**: `c:\Users\aelkh\AI Projects\job hunt\jobhunt-crew`  
+**Target Workspace**: the repository root (`jobhunt-crew/`)  
 **Execution Command**: `node tests/e2e-runner.js` (or `npm test`)  
 **Design Methodology**: Opaque-box, requirement-grounded, zero-external-dependency test harness.
 

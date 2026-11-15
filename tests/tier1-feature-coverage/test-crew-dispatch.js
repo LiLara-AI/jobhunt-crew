@@ -116,7 +116,7 @@ suite.test('Antigravity Scheduled Task sidecar definitions comply with JSON spec
     restart_policy: 'always',
     display_name: 'Crew Morning Dispatcher',
     agent_permissions: {
-      workspace_uris: ['c:/Users/aelkh/AI Projects/job hunt/jobhunt-crew']
+      workspace_uris: ['c:/Users/example/jobhunt-crew']
     }
   };
 
