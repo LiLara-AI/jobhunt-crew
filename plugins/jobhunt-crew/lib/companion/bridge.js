@@ -24,14 +24,56 @@ const { replayLedger } = require('../ledger/reducer');
 const { withLock } = require('../ledger/lock');
 const { CompanionValidationGate } = require('./validation');
 
+const MOVE_MARKER_STALE_MS = 30000;
+
 /**
- * Cross-platform safe file move with retries for Windows EPERM/EBUSY file locks.
+ * Cross-platform safe file move where at most one concurrent mover wins.
+ *
+ * A bare rename is not enough on Windows: rename acts on an open handle, so
+ * two processes renaming the same file can both "succeed" (the second moves
+ * the file the first just placed). An exclusive `<src>.moving` marker,
+ * created with O_EXCL ('wx'), elects a single mover first.
  *
  * @param {string} src - Source file path
  * @param {string} dest - Destination file path
  * @param {number} [retries=3] - Number of retry attempts
+ * @returns {boolean} true only for the mover that now owns `dest`
  */
 function safeMoveFile(src, dest, retries = 3) {
+  const marker = `${src}.moving`;
+  if (!acquireMoveMarker(marker)) return false;
+  try {
+    return moveFileUnguarded(src, dest, retries);
+  } finally {
+    try { fs.unlinkSync(marker); } catch (_) {}
+  }
+}
+
+function acquireMoveMarker(marker) {
+  try {
+    fs.closeSync(fs.openSync(marker, 'wx'));
+    return true;
+  } catch (err) {
+    if (err.code === 'ENOENT') return false; // directory is gone
+    if (err.code !== 'EEXIST') throw err;
+  }
+  // Reclaim a marker left by a crashed mover so the file is not stuck forever.
+  try {
+    if (Date.now() - fs.statSync(marker).mtimeMs <= MOVE_MARKER_STALE_MS) return false;
+    fs.unlinkSync(marker);
+    fs.closeSync(fs.openSync(marker, 'wx'));
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * Rename with Windows EPERM/EBUSY retries and copy fallback. Callers must hold
+ * the move marker (see safeMoveFile); this function alone does not exclude
+ * concurrent movers.
+ */
+function moveFileUnguarded(src, dest, retries = 3) {
   if (!fs.existsSync(src)) {
     return false;
   }
@@ -88,7 +130,7 @@ function safeMoveFile(src, dest, retries = 3) {
         }
         if (retries > 0) {
           Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20);
-          return safeMoveFile(src, dest, retries - 1);
+          return moveFileUnguarded(src, dest, retries - 1); // marker still held by caller
         }
         return false;
       }

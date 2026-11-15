@@ -65,9 +65,6 @@ const SUITES = [
   { name: 'M8 Deterministic Packaging & Capabilities Verification', file: path.join(__dirname, 'integration', 'test-packaging-and-capabilities.js') },
   { name: 'Tier 4 Full Job Search Simulation', file: path.join(__dirname, 'tier4-real-world', 'test-full-job-search-lifecycle.js') },
   // --- Formerly orphaned suites (Workstream E consolidation) ---
-  // NOTE: tier2-boundary-corners/test-branch-trace.js is intentionally absent:
-  // it is a helper library (exports instrumentedSafeMoveFile) exercised by
-  // run-branch-race.js below, not a standalone suite.
   { name: 'Tier 1 Crew Dispatch', file: path.join(__dirname, 'tier1-feature-coverage', 'test-crew-dispatch.js') },
   { name: 'Tier 2 Verifier Challenger Deep Stress', file: path.join(__dirname, 'tier2-boundary-corners', 'test-verifier-challenger-deep-stress.js') },
   { name: 'Tier 2 Verifier Challenger Novel Probes', file: path.join(__dirname, 'tier2-boundary-corners', 'test-verifier-challenger-novel-probes.js') },
