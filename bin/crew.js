@@ -23,6 +23,7 @@ const { runMigrate } = require('../lib/cli/commands/migrate');
 const { runApplyPack, runBlindReview, runOutreach, runInterviewStory, runKsaOffer, runCadence } = require('../lib/cli/commands/crew-ops');
 const { runCompanion } = require('../lib/cli/commands/companion');
 const { runContact } = require('../lib/cli/commands/contact');
+const { runTool } = require('../lib/cli/commands/tool');
 const { runInit, runDoctor, runAlerts, runRetro, runMcp, runUi, runExport } = require('../lib/cli/commands/ops');
 
 function showHelp() {
@@ -149,6 +150,9 @@ Commands:
 
   contact get (--id <id> | --name <n> | <id>) [--json] [--workspace <dir>]
       Show one local contact by id or name
+
+  tool list | tool <name> [--args <json> | --args-file <path>] [--workspace <dir>]
+      Run any crew_* MCP tool from the shell (for hosts without the MCP server)
 
   help
       Show this help message
@@ -297,9 +301,11 @@ async function main() {
         process.exit(await runDiscover(restArgs[0], restArgs.slice(1)));
         break;
 
-      case 'ui':
-        await runUi(restArgs);
+      case 'ui': {
+        const rc = await runUi(restArgs);
+        if (rc) process.exit(rc); // e.g. port in use; success keeps the server running
         break;
+      }
 
       case 'export':
         process.exit(await runExport(restArgs));
@@ -319,6 +325,11 @@ async function main() {
           process.exit(1);
         }
         process.exit(await runContact(restArgs[0], restArgs.slice(1)));
+        break;
+
+      case 'tool':
+        // exitCode, not exit(): large JSON on a Windows pipe is written async and would be cut off.
+        process.exitCode = await runTool(restArgs);
         break;
 
       default:
@@ -364,5 +375,6 @@ module.exports = {
   runUi,
   runExport,
   runCompanion,
-  runContact
+  runContact,
+  runTool
 };

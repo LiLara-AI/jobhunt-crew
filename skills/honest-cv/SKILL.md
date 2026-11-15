@@ -59,6 +59,28 @@ Show the exact violating sentences, the claim they needed, and the two honest
 options: reword to match the dossier, or confirm a corrected claim through the
 update skill. Never silently soften numbers to make the check pass.
 
+## Running the engine
+
+Read the operating rules in `${CLAUDE_PLUGIN_ROOT}/rules/AGENTS.md` first; they
+override this skill.
+
+The steps name `crew_*` tools. Call them as MCP tools when this session has
+them. Otherwise run the same tool through the bundled CLI (Node 18+):
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job-hunt folder>" --args '<json arguments>'
+```
+
+- `crew <command>` in this skill means
+  `node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" <command> --workspace "<job-hunt folder>"`.
+- The job-hunt folder is the user's folder that holds `.crew/` and `dossier.json`
+  (in Cowork, the folder the user connected). Never use the plugin folder: it
+  can be read-only and is replaced on every update.
+- `crew tool list` prints every tool and its arguments. For long or quoted
+  JSON, write it to a file and pass `--args-file <path>` instead of `--args`.
+- If `${CLAUDE_PLUGIN_ROOT}` appears literally (hosts other than Claude), use
+  the plugin root instead: the folder that contains `skills/` and `bin/`.
+
 ## Tool reference
 
 - MCP: `crew_get_job`, `crew_editorial_rules`, `crew_blind_review`,

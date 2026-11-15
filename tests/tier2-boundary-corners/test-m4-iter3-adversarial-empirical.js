@@ -450,14 +450,23 @@ suite.test('4.2 Token Bucket: Bucket capacity is strictly respected and never ov
   limiter.refill(ghBucket);
   assert.equal(ghBucket.tokens, 10, 'Tokens after long elapsed time must remain clamped to capacity (10)');
 
-  // Draining bucket: acquire 10 tokens
-  for (let i = 0; i < 10; i++) {
-    assert.equal(limiter.tryAcquire(ghDomain, 1), true, `Token acquisition #${i + 1} must succeed`);
-  }
-  assert.equal(ghBucket.tokens, 0, 'Tokens after 10 acquisitions must be 0');
+  // Freeze the clock: real time passing between acquisitions refills fractional tokens (flaky under load).
+  const realNow = Date.now;
+  const frozen = realNow();
+  Date.now = () => frozen;
+  ghBucket.lastRefill = frozen;
+  try {
+    // Draining bucket: acquire 10 tokens
+    for (let i = 0; i < 10; i++) {
+      assert.equal(limiter.tryAcquire(ghDomain, 1), true, `Token acquisition #${i + 1} must succeed`);
+    }
+    assert.equal(ghBucket.tokens, 0, 'Tokens after 10 acquisitions must be 0');
 
-  // 11th acquisition must fail immediately without tokens
-  assert.equal(limiter.tryAcquire(ghDomain, 1), false, 'Acquisition on depleted bucket must return false');
+    // 11th acquisition must fail immediately without tokens
+    assert.equal(limiter.tryAcquire(ghDomain, 1), false, 'Acquisition on depleted bucket must return false');
+  } finally {
+    Date.now = realNow;
+  }
 
   // Test LinkedIn: capacity = 1, maxConcurrency = 1
   const liDomain = 'linkedin.com';

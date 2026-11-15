@@ -97,6 +97,18 @@ class ApplyPackGenerator {
   /**
    * Compiles the Markdown content for apply-pack.md.
    */
+  /**
+   * Reads the recorded verification and review for a job from a snapshot
+   * application record, so the pack reports what actually ran.
+   */
+  static checksFromApplication(app) {
+    const verification = app && app.verification ? app.verification : null;
+    const reviewVerdict = app && app.review
+      ? { verdict: app.review.verdict, overallScore: app.review.score }
+      : null;
+    return { verification, reviewVerdict };
+  }
+
   static compileApplyPackMarkdown(packData) {
     const {
       company,
@@ -106,15 +118,26 @@ class ApplyPackGenerator {
       artifacts,
       claimsUsed,
       reviewVerdict,
+      verification,
       screeningAnswers,
       preFillPlan
     } = packData;
 
     const lines = [];
+    // Never report a gate as passed unless its result was recorded.
+    const verifierLabel = !verification ? 'NOT RUN'
+      : (verification.passed === true ? 'PASSED'
+        : 'FAILED (' + (verification.violationsCount || (verification.violations || []).length) + ' violations)');
+    const reviewLabel = reviewVerdict && reviewVerdict.verdict ? String(reviewVerdict.verdict) : 'NOT RUN';
+    const fmtScore = (v) => (typeof v === 'number' && Number.isFinite(v) ? v + ' / 5.0' : 'n/a');
 
     lines.push(`# Stage 7 Apply Pack: ${company} — ${roleTitle}`);
     lines.push('');
-    lines.push('> **Status**: `ready-to-submit` · Deterministic Claim-Verified · Blind Review Approved');
+    lines.push('> **Status**: `ready-to-submit` · Claim verification: ' + verifierLabel + ' · Blind review: ' + reviewLabel);
+    if (verifierLabel !== 'PASSED' || reviewLabel !== 'APPROVE') {
+      lines.push('>');
+      lines.push('> ⚠ Do not submit until claim verification has PASSED and the blind review is APPROVE.');
+    }
     lines.push('');
 
     // Section 1: Position Overview
@@ -122,7 +145,7 @@ class ApplyPackGenerator {
     lines.push(`- **Enterprise**: ${company}`);
     lines.push(`- **Role Title**: ${roleTitle}`);
     lines.push(`- **Posting URL**: ${jobUrl || 'N/A'}`);
-    lines.push(`- **Triage Match Score**: ${matchScore ? `${matchScore} / 5.0` : '4.8 / 5.0'}`);
+    lines.push('- **Triage Match Score**: ' + (typeof matchScore === 'number' && Number.isFinite(matchScore) ? fmtScore(matchScore) : 'not triaged'));
     lines.push('');
 
     // Section 2: Tailored Artifacts
@@ -140,29 +163,29 @@ class ApplyPackGenerator {
 
     // Section 3: Claim Verification Manifest
     lines.push('## 3. Claim Verification Manifest');
-    lines.push('- **Verifier Status**: `✅ PASSED (0 unverified claims, 0 fabrications)`');
+    lines.push('- **Verifier Status**: `' + verifierLabel + '`');
+    if (!verification) lines.push('- Run `crew_verify_draft` (CLI `crew claim verify`) on the CV and cover letter, then rebuild this pack.');
     if (claimsUsed && claimsUsed.length > 0) {
       lines.push(`- **Verified Claims Referenced**: ${claimsUsed.map(c => `\`[${c}]\``).join(', ')}`);
     } else {
-      lines.push('- **Verified Claims Referenced**: All statements anchored in verified candidate dossier.');
+      lines.push('- **Verified Claims Referenced**: none listed.');
     }
     lines.push('');
 
     // Section 4: Blind Review Panel
     lines.push('## 4. Blind Review Panel Evaluation');
     if (reviewVerdict) {
-      lines.push(`- **Verdict**: \`${reviewVerdict.verdict || 'APPROVE'}\``);
-      lines.push(`- **Overall Score**: ${reviewVerdict.overallScore || '4.8'} / 5.0`);
-      if (reviewVerdict.recruiter) {
-        lines.push(`- **Recruiter Feedback**: ${reviewVerdict.recruiter.feedback ? reviewVerdict.recruiter.feedback.join('; ') : 'Strong ATS keyword alignment'}`);
+      lines.push('- **Verdict**: `' + reviewLabel + '`');
+      lines.push('- **Overall Score**: ' + fmtScore(reviewVerdict.overallScore));
+      if (reviewVerdict.recruiter && Array.isArray(reviewVerdict.recruiter.feedback)) {
+        lines.push('- **Recruiter Feedback**: ' + reviewVerdict.recruiter.feedback.join('; '));
       }
-      if (reviewVerdict.hiringManager) {
-        lines.push(`- **Hiring Manager Feedback**: ${reviewVerdict.hiringManager.feedback ? reviewVerdict.hiringManager.feedback.join('; ') : 'Solid distributed systems scale metrics'}`);
+      if (reviewVerdict.hiringManager && Array.isArray(reviewVerdict.hiringManager.feedback)) {
+        lines.push('- **Hiring Manager Feedback**: ' + reviewVerdict.hiringManager.feedback.join('; '));
       }
     } else {
-      lines.push('- **Verdict**: `APPROVE`');
-      lines.push('- **Overall Score**: 4.8 / 5.0');
-      lines.push('- **Panel Summary**: Passed blind recruiter and hiring manager evaluations.');
+      lines.push('- **Verdict**: `NOT RUN`');
+      lines.push('- Run `crew_blind_review`, record it with `crew_review_record`, then rebuild this pack.');
     }
     lines.push('');
 
@@ -199,7 +222,9 @@ class ApplyPackGenerator {
    * Generates and writes apply-pack.md to disk.
    */
   static writeApplyPack(workspaceDir, company, roleTitle, packData = {}) {
-    const slug = `${company.replace(/[^a-zA-Z0-9]/g, '_')}_${roleTitle.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    // Unicode-aware so non-Latin (e.g. Arabic) names do not collapse to underscores and collide.
+    const toSlug = (s) => String(s).replace(/[^\p{L}\p{N}]/gu, '_');
+    const slug = `${toSlug(company)}_${toSlug(roleTitle)}`;
     const appDir = path.join(workspaceDir, 'applications', slug);
 
     if (!fs.existsSync(appDir)) {
@@ -210,14 +235,15 @@ class ApplyPackGenerator {
       company,
       roleTitle,
       jobUrl: packData.jobUrl || '',
-      matchScore: packData.matchScore || 4.8,
+      matchScore: packData.matchScore,
       artifacts: packData.artifacts || {
         cvDocx: `CV_${slug}.docx`,
         cvPdf: `CV_${slug}.pdf`,
         coverLetterDocx: `CoverLetter_${slug}.docx`
       },
       claimsUsed: packData.claimsUsed || [],
-      reviewVerdict: packData.reviewVerdict || { verdict: 'APPROVE', overallScore: 4.8 },
+      reviewVerdict: packData.reviewVerdict || null,
+      verification: packData.verification || null,
       screeningAnswers: packData.screeningAnswers || {},
       preFillPlan: packData.preFillPlan || { safetyGate: { status: 'ready-to-submit' } }
     };

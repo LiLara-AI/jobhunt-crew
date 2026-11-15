@@ -146,14 +146,22 @@ claude plugin marketplace add LiLara-AI/jobhunt-crew
 claude plugin install jobhunt-crew@lilara-jobhunt
 ```
 
-> **MCP tools are registered separately.** Cowork's marketplace validator
-> rejects plugin-bundled stdio MCP servers, so the plugin ships skills and
-> agents only. To enable the `crew_*` MCP tools in Claude Code, register the
-> bundled server once (skills also work through the `crew` CLI without it):
+> **No MCP setup needed.** Cowork's marketplace validator rejects
+> plugin-bundled stdio MCP servers, so the plugin declares none. Skills run
+> every `crew_*` tool through the bundled CLI bridge
+> (`node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <name> --workspace <folder>`),
+> which works in Claude Code and Cowork alike. In Claude Code you can still
+> register the server for native tool calls:
 >
 > ```bash
-> claude mcp add crew -- node /path/to/jobhunt-crew/bin/crew-mcp.js --workspace /path/to/jobhunt-crew
+> claude mcp add crew -e CREW_WORKSPACE=/path/to/your/job-hunt-folder -- node /path/to/jobhunt-crew/bin/crew-mcp.js
 > ```
+
+### Running on Claude Desktop chat, Codex/ChatGPT, and Kimi
+
+See [docs/hosts.md](docs/hosts.md) for copy-paste MCP configs for Claude Desktop
+chat, Codex, ChatGPT (via `crew-mcp --http` and an HTTPS tunnel), Kimi Code CLI (`--skills-dir`),
+and Gemini CLI.
 
 For local development, you can also build and validate the plugin bundle:
 

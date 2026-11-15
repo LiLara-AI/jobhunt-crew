@@ -48,6 +48,28 @@ Run the simulation in the archetype the user picks (default order below):
 5. **Close with gaps.** Name requirement areas with no confirmed story and route
    the user to the update skill to confirm the missing claims honestly.
 
+## Running the engine
+
+Read the operating rules in `${CLAUDE_PLUGIN_ROOT}/rules/AGENTS.md` first; they
+override this skill.
+
+The steps name `crew_*` tools. Call them as MCP tools when this session has
+them. Otherwise run the same tool through the bundled CLI (Node 18+):
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job-hunt folder>" --args '<json arguments>'
+```
+
+- `crew <command>` in this skill means
+  `node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" <command> --workspace "<job-hunt folder>"`.
+- The job-hunt folder is the user's folder that holds `.crew/` and `dossier.json`
+  (in Cowork, the folder the user connected). Never use the plugin folder: it
+  can be read-only and is replaced on every update.
+- `crew tool list` prints every tool and its arguments. For long or quoted
+  JSON, write it to a file and pass `--args-file <path>` instead of `--args`.
+- If `${CLAUDE_PLUGIN_ROOT}` appears literally (hosts other than Claude), use
+  the plugin root instead: the folder that contains `skills/` and `bin/`.
+
 ## Tool reference
 
 - MCP: `crew_interview_story`, `crew_get_job`, `crew_get_snapshot`

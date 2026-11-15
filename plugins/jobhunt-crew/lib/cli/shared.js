@@ -10,7 +10,7 @@
 
 const path = require('path');
 
-const VERSION = '0.2.1';
+const VERSION = '0.2.2';
 
 function parseArgs(rawArgs) {
   const flags = {};
@@ -22,21 +22,24 @@ function parseArgs(rawArgs) {
     flags[camelKey] = val;
   };
 
+  // Only "-x"/"--xyz" start a new flag, so values like "-", "-5" or "- led team" stay values.
+  const isFlag = (tok) => /^--?[A-Za-z]/.test(tok);
+
   for (let i = 0; i < rawArgs.length; i++) {
     const arg = rawArgs[i];
     if (arg.startsWith('--')) {
       const key = arg.slice(2);
       if (key.includes('=')) {
-        const [k, v] = key.split('=', 2);
-        setFlag(k, v);
-      } else if (i + 1 < rawArgs.length && !rawArgs[i + 1].startsWith('-')) {
+        const eq = key.indexOf('=');
+        setFlag(key.slice(0, eq), key.slice(eq + 1)); // keep later '=' (URLs, JSON)
+      } else if (i + 1 < rawArgs.length && !isFlag(rawArgs[i + 1])) {
         setFlag(key, rawArgs[++i]);
       } else {
         setFlag(key, true);
       }
-    } else if (arg.startsWith('-') && arg.length > 1) {
+    } else if (isFlag(arg)) {
       const key = arg.slice(1);
-      if (i + 1 < rawArgs.length && !rawArgs[i + 1].startsWith('-')) {
+      if (i + 1 < rawArgs.length && !isFlag(rawArgs[i + 1])) {
         setFlag(key, rawArgs[++i]);
       } else {
         setFlag(key, true);
@@ -50,8 +53,9 @@ function parseArgs(rawArgs) {
 }
 
 function resolveWorkspace(flags) {
-  const ws = flags.workspace || flags.w;
-  return ws ? path.resolve(ws) : process.cwd();
+  // CREW_WORKSPACE lets host MCP configs pin the workspace regardless of the launch cwd.
+  const ws = flags.workspace || flags.w || process.env.CREW_WORKSPACE;
+  return typeof ws === 'string' && ws ? path.resolve(ws) : process.cwd();
 }
 
 module.exports = {

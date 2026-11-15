@@ -12,7 +12,7 @@ drafting preference, change targets, or bring workspace state back in sync.
 
 1. **Load current state.** Read `.crew/snapshot.json` via MCP `crew_get_snapshot`
    and note open `[CONFIRM]` items, stale applications, and pending decisions.
-2. **Replay before editing.** Run `node bin/crew.js ledger replay` so the snapshot
+2. **Replay before editing.** Run `crew ledger replay` so the snapshot
    reflects every recorded event. Never edit `snapshot.json` by hand.
 3. **Apply the requested change, one topic at a time:**
    - New or corrected career facts: add them to `dossier.json` as new `[C-xx]`
@@ -34,6 +34,28 @@ drafting preference, change targets, or bring workspace state back in sync.
    offer a backup via MCP `crew_backup` (CLI `crew backup`).
 6. **Summarize.** Report claims added or changed, rules learned, drafts sent back
    for rework, and what still waits on `[CONFIRM]`.
+
+## Running the engine
+
+Read the operating rules in `${CLAUDE_PLUGIN_ROOT}/rules/AGENTS.md` first; they
+override this skill.
+
+The steps name `crew_*` tools. Call them as MCP tools when this session has
+them. Otherwise run the same tool through the bundled CLI (Node 18+):
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job-hunt folder>" --args '<json arguments>'
+```
+
+- `crew <command>` in this skill means
+  `node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" <command> --workspace "<job-hunt folder>"`.
+- The job-hunt folder is the user's folder that holds `.crew/` and `dossier.json`
+  (in Cowork, the folder the user connected). Never use the plugin folder: it
+  can be read-only and is replaced on every update.
+- `crew tool list` prints every tool and its arguments. For long or quoted
+  JSON, write it to a file and pass `--args-file <path>` instead of `--args`.
+- If `${CLAUDE_PLUGIN_ROOT}` appears literally (hosts other than Claude), use
+  the plugin root instead: the folder that contains `skills/` and `bin/`.
 
 ## Tool reference
 

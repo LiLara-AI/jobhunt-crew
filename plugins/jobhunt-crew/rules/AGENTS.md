@@ -64,3 +64,29 @@ Keep high-volume scanning and bookkeeping on Flash.
   files, commits, or tool output meant for sharing.
 - Blind review payloads are scrubbed of candidate identity before the Critic
   sees them (`lib/honest-cv/review-panel.js`).
+
+## Running the engine on any host
+
+The engine is plain Node.js 18+ with no dependencies. Two folders matter:
+
+- **Plugin root**: the folder holding `bin/`, `lib/`, `skills/`, and this file.
+  In Claude Code and Cowork it is `${CLAUDE_PLUGIN_ROOT}`. Treat it as
+  read-only: it can be replaced on every plugin update.
+- **Workspace**: the user's job-hunt folder holding `.crew/`, `dossier.json`,
+  and `applications/`. In Cowork this is the folder the user connected.
+  Always pass it as `--workspace "<folder>"` (or set `CREW_WORKSPACE`).
+
+Every `crew_*` tool can be called in one of two ways:
+
+1. As an MCP tool, when the host has the `crew` server registered.
+2. Through the CLI bridge, which runs the same handler:
+   `node "<plugin root>/bin/crew.js" tool <crew_tool_name> --workspace "<folder>" --args '<json>'`
+   Use `--args-file <path>` for long JSON or shells that mangle quotes
+   (PowerShell, cmd). `node "<plugin root>/bin/crew.js" tool list` prints every
+   tool and its arguments.
+
+Lifecycle commands have no MCP tool and use the CLI directly: `init`,
+`doctor`, `ledger replay`, `ledger append`, `claim verify`, `export`, `ui`.
+
+Host setup (MCP registration for Claude Desktop, Codex, Kimi, ChatGPT) is in
+`docs/hosts.md`.
