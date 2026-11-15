@@ -69,7 +69,8 @@ Keep high-volume scanning and bookkeeping on Flash.
 
 The engine is plain Node.js 18+ with no dependencies. Two folders matter:
 
-- **Plugin root**: the folder holding `bin/`, `lib/`, `skills/`, and this file.
+- **Plugin root**: the folder holding `lib/`, `skills/`, and this file. The
+  `crew.js` entry script sits in `bin/` (repo checkout) or `cli/` (Claude plugin).
   In Claude Code and Cowork it is `${CLAUDE_PLUGIN_ROOT}`. Treat it as
   read-only: it can be replaced on every plugin update.
 - **Workspace**: the user's job-hunt folder holding `.crew/`, `dossier.json`,
@@ -80,9 +81,9 @@ Every `crew_*` tool can be called in one of two ways:
 
 1. As an MCP tool, when the host has the `crew` server registered.
 2. Through the CLI bridge, which runs the same handler:
-   `node "<plugin root>/bin/crew.js" tool <crew_tool_name> --workspace "<folder>" --args '<json>'`
+   `node "<plugin root>/cli/crew.js" tool <crew_tool_name> --workspace "<folder>" --args '<json>'`
    Use `--args-file <path>` for long JSON or shells that mangle quotes
-   (PowerShell, cmd). `node "<plugin root>/bin/crew.js" tool list` prints every
+   (PowerShell, cmd). `node "<plugin root>/cli/crew.js" tool list` prints every
    tool and its arguments.
 
 Lifecycle commands have no MCP tool and use the CLI directly: `init`,

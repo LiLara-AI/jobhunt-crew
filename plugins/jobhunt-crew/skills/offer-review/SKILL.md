@@ -48,18 +48,18 @@ The steps name `crew_*` tools. Call them as MCP tools when this session has
 them. Otherwise run the same tool through the bundled CLI (Node 18+):
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job-hunt folder>" --args '<json arguments>'
+node "${CLAUDE_PLUGIN_ROOT}/cli/crew.js" tool <crew_tool_name> --workspace "<job-hunt folder>" --args '<json arguments>'
 ```
 
 - `crew <command>` in this skill means
-  `node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" <command> --workspace "<job-hunt folder>"`.
+  `node "${CLAUDE_PLUGIN_ROOT}/cli/crew.js" <command> --workspace "<job-hunt folder>"`.
 - The job-hunt folder is the user's folder that holds `.crew/` and `dossier.json`
   (in Cowork, the folder the user connected). Never use the plugin folder: it
   can be read-only and is replaced on every update.
 - `crew tool list` prints every tool and its arguments. For long or quoted
   JSON, write it to a file and pass `--args-file <path>` instead of `--args`.
 - If `${CLAUDE_PLUGIN_ROOT}` appears literally (hosts other than Claude), use
-  the plugin root instead: the folder that contains `skills/` and `bin/`.
+  the plugin root instead: the folder that contains `skills/` and `lib/`.
 
 ## Tool reference
 

@@ -49,7 +49,7 @@ function looksLikeMissingFile(value) {
 }
 
 const SERVER_NAME = 'jobhunt-crew-mcp';
-const SERVER_VERSION = '0.2.2';
+const SERVER_VERSION = '0.2.3';
 const PROTOCOL_VERSION = '2024-11-05';
 // Versions this server can speak; echo the client's if listed, else fall back.
 const SUPPORTED_PROTOCOL_VERSIONS = ['2024-11-05', '2025-03-26', '2025-06-18'];

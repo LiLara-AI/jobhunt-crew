@@ -13,6 +13,9 @@ const fs = require('fs');
 const path = require('path');
 const { MiniZipBuilder } = require('../honest-cv/doc-generator');
 
+// Folder the CLI entry scripts ship in inside the Claude bundle (claude.ai rejects bin/).
+const BUNDLE_CLI_DIR = 'cli';
+
 class ClaudePluginCompiler {
   constructor(options = {}) {
     this.workspaceDir = options.workspaceDir ? path.resolve(options.workspaceDir) : path.resolve(__dirname, '../..');
@@ -383,6 +386,33 @@ Handles applications to several openings at the same employer with one convergen
   }
 
   /**
+   * Points bundle docs (skills, agents, rules, README) at
+   * cli/ instead of bin/ and drops package.json "bin" (no PATH executables).
+   */
+  static _rewriteBinPaths(outDir) {
+    const walk = (dir) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (entry.name !== 'lib' && entry.name !== BUNDLE_CLI_DIR) walk(full);
+        } else if (entry.name.endsWith('.md')) {
+          const text = fs.readFileSync(full, 'utf8');
+          const next = text.replace(/\bbin\/crew/g, `${BUNDLE_CLI_DIR}/crew`);
+          if (next !== text) fs.writeFileSync(full, next, 'utf8');
+        }
+      }
+    };
+    walk(outDir);
+    const pkgPath = path.join(outDir, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      delete pkg.bin; // no PATH executables in a claude.ai-hosted plugin; scripts run via `node`
+      if (Array.isArray(pkg.files)) pkg.files = pkg.files.map(f => (f === 'bin' ? BUNDLE_CLI_DIR : f));
+      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+    }
+  }
+
+  /**
    * Copies a source directory tree into the bundle, skipping symlinks.
    */
   _copyDirRecursive(srcDir, destDir) {
@@ -451,15 +481,18 @@ Handles applications to several openings at the same employer with one convergen
       }
     }
 
-    // 5. Engine runtime (bin/lib/templates) so the manifest MCP path
-    //    resolves inside a standalone bundle (zip upload, no repo clone).
-    for (const dirName of ['bin', 'lib', 'templates']) {
-      this._copyDirRecursive(path.join(this.workspaceDir, dirName), path.join(this.outDir, dirName));
+    // 5. Engine runtime so a standalone bundle (zip upload, no repo clone) runs.
+    //    claude.ai's validator rejects a top-level bin/ ("may not ship bin/
+    //    executables"), so the entry scripts ship as cli/ in this bundle only.
+    const dirMap = { bin: BUNDLE_CLI_DIR, lib: 'lib', templates: 'templates' };
+    for (const [from, to] of Object.entries(dirMap)) {
+      this._copyDirRecursive(path.join(this.workspaceDir, from), path.join(this.outDir, to));
     }
     for (const fileName of ['package.json', 'LICENSE', 'NOTICE', 'README.md']) {
       const src = path.join(this.workspaceDir, fileName);
       if (fs.existsSync(src)) fs.copyFileSync(src, path.join(this.outDir, fileName));
     }
+    ClaudePluginCompiler._rewriteBinPaths(this.outDir);
 
     let writtenZipPath = null;
     if (this.zip) {

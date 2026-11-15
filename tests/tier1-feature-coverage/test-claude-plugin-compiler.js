@@ -150,7 +150,12 @@ suite.test('TC-COMPILER-06: Self-Contained Bundle (engine ships, no bundled MCP 
     // stdio-based, so the manifest must not declare it; hosts register it
     // explicitly (claude mcp add / Desktop config / mcp_config.json).
     assert.equal(Object.prototype.hasOwnProperty.call(manifest, 'mcpServers'), false, 'Manifest must not declare bundled MCP servers (Cowork sync validator)');
-    assert.ok(fs.existsSync(path.join(bundle, 'bin', 'crew-mcp.js')), 'MCP entry script must exist inside bundle: bin/crew-mcp.js');
+    // claude.ai upload validation: "claude.ai-hosted plugins may not ship bin/ executables".
+    assert.ok(!fs.existsSync(path.join(bundle, 'bin')), 'Bundle must not ship a top-level bin/ (claude.ai plugin validator)');
+    assert.ok(fs.existsSync(path.join(bundle, 'cli', 'crew-mcp.js')), 'MCP entry script must exist inside bundle: cli/crew-mcp.js');
+    assert.ok(fs.existsSync(path.join(bundle, 'cli', 'crew.js')), 'CLI entry script must exist inside bundle: cli/crew.js');
+    const bundledSkill = fs.readFileSync(path.join(bundle, 'skills', 'setup', 'SKILL.md'), 'utf8');
+    assert.ok(bundledSkill.includes('${CLAUDE_PLUGIN_ROOT}/cli/crew.js') && !bundledSkill.includes('bin/crew'), 'Bundled skills must call cli/crew.js');
     assert.ok(fs.existsSync(path.join(bundle, 'lib', 'mcp', 'server.js')), 'Bundle must include lib/mcp/server.js');
     assert.ok(fs.existsSync(path.join(bundle, 'templates')), 'Bundle must include templates/');
     assert.ok(!fs.existsSync(path.join(bundle, 'mcp_config.json')), 'Bundle must not ship mcp_config.json (stdio MCP declaration fails Cowork sync validation)');

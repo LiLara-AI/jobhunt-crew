@@ -1,17 +1,13 @@
 {
   "name": "jobhunt-crew",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Deterministic multi-agent job hunt automation and honest CV tailoring platform with verified claims and append-only ledger",
   "author": "JobHunt Crew Authors",
   "license": "MIT",
   "type": "commonjs",
   "main": "lib/index.js",
-  "bin": {
-    "crew": "./bin/crew.js",
-    "crew-mcp": "./bin/crew-mcp.js"
-  },
   "files": [
-    "bin",
+    "cli",
     "lib",
     "agents",
     "skills",

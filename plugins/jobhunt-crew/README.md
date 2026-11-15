@@ -37,7 +37,7 @@ JobHunt Crew is engineered from first principles with a privacy-first, evidence-
                                                             v
 +-------------------------------------------------------------------------------------------------------------------+
 |                                        Deterministic Tool Surface & CLI                                           |
-|                                       bin/crew.js  ·  Native MCP Server                                           |
+|                                       cli/crew.js  ·  Native MCP Server                                           |
 +-------------------------------------------------------------------------------------------------------------------+
                                                             |
                 +-------------------------------------------+-----------------------------------------+
@@ -66,7 +66,7 @@ JobHunt Crew is engineered from first principles with a privacy-first, evidence-
 
 ### Core Architecture Components
 
-1. **Deterministic Tool Surface (`bin/crew.js` & MCP Server)**: Agents interact with system state exclusively through a standardized, validated tool API. Direct, manual editing of state files is strictly disallowed.
+1. **Deterministic Tool Surface (`cli/crew.js` & MCP Server)**: Agents interact with system state exclusively through a standardized, validated tool API. Direct, manual editing of state files is strictly disallowed.
 2. **Append-Only Event Ledger (`.crew/ledger.jsonl`)**: The single immutable source of truth. Every transition (job discovered, triaged, claimed, drafted, verified, reviewed, or submitted) is recorded as a cryptographically hash-chained event with sequential ID and UTC timestamp.
 3. **Pure Reducer Projection (`.crew/snapshot.json`)**: A deterministic projection derived by playing back ledger events from event #1. If deleted, it can be recomputed instantaneously.
 4. **Cross-Process Concurrency (`.crew/ledger.lock`)**: Atomic lockfile mechanism with process ID verification, lease heartbeats, and stale-lease reclamation, allowing four or more concurrent agents to execute safely without data collisions.
@@ -108,7 +108,7 @@ git clone https://github.com/LiLara-AI/jobhunt-crew.git
 cd jobhunt-crew
 
 # Initialize the clean-room workspace
-node bin/crew.js init
+node cli/crew.js init
 ```
 
 ### Running on Google Antigravity 2.0
@@ -119,7 +119,7 @@ node bin/crew.js init
      "mcpServers": {
        "crew": {
          "command": "node",
-         "args": ["<path-to-jobhunt-crew>/bin/crew.js", "mcp"]
+         "args": ["<path-to-jobhunt-crew>/cli/crew.js", "mcp"]
        }
      }
    }
@@ -149,12 +149,12 @@ claude plugin install jobhunt-crew@lilara-jobhunt
 > **No MCP setup needed.** Cowork's marketplace validator rejects
 > plugin-bundled stdio MCP servers, so the plugin declares none. Skills run
 > every `crew_*` tool through the bundled CLI bridge
-> (`node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <name> --workspace <folder>`),
+> (`node "${CLAUDE_PLUGIN_ROOT}/cli/crew.js" tool <name> --workspace <folder>`),
 > which works in Claude Code and Cowork alike. In Claude Code you can still
 > register the server for native tool calls:
 >
 > ```bash
-> claude mcp add crew -e CREW_WORKSPACE=/path/to/your/job-hunt-folder -- node /path/to/jobhunt-crew/bin/crew-mcp.js
+> claude mcp add crew -e CREW_WORKSPACE=/path/to/your/job-hunt-folder -- node /path/to/jobhunt-crew/cli/crew-mcp.js
 > ```
 
 ### Running on Claude Desktop chat, Codex/ChatGPT, and Kimi
@@ -196,7 +196,7 @@ To protect data integrity, the following features require system-level execution
 * Local HTTP Command Center server (127.0.0.1 token authentication).
 * Direct ATS REST API automated sweeps and rate-limited HTTP crawlers.
 * Atomic multi-process concurrency locking (`.crew/ledger.lock`).
-* Standalone CLI operations (`bin/crew.js`).
+* Standalone CLI operations (`cli/crew.js`).
 
 ---
 
@@ -226,7 +226,7 @@ npm test
 ### System Health Diagnostic
 Run the built-in diagnostic utility to check connectors, session health, and ledger integrity:
 ```bash
-node bin/crew.js doctor
+node cli/crew.js doctor
 ```
 
 ---

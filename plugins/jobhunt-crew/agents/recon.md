@@ -32,7 +32,7 @@ Execute sweeps across four distinct channels:
 1. **Channel 1 — Attended Authenticated Job Boards:**
    Use Chrome DevTools MCP sessions to check authenticated feeds on LinkedIn, Bayt, GulfTalent, Naukrigulf, and Indeed SA in both English and Arabic query variants.
 2. **Channel 2 — Direct ATS API Sweeps:**
-   Run `node <plugin root>/bin/crew.js discover sweep --workspace <folder>` to query direct JSON endpoints for Greenhouse, Lever, Ashby, Workday (`wday/cxs`), SmartRecruiters, and Oracle Cloud HCM.
+   Run `node <plugin root>/cli/crew.js discover sweep --workspace <folder>` to query direct JSON endpoints for Greenhouse, Lever, Ashby, Workday (`wday/cxs`), SmartRecruiters, and Oracle Cloud HCM.
 3. **Channel 3 — 40+ Enterprise & Giga-Project Watchlist:**
    Sweep targeted careers portals across Vision 2030 giga-projects (NEOM, Red Sea Global, Qiddiya, ROSHN, Diriyah) and national champions (STC, Elm, Almarai, SABIC).
 4. **Channel 4 — Transversal Search Discovery:**

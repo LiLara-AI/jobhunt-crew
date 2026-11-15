@@ -5,7 +5,7 @@
  * @module jobhunt-crew
  */
 
-const { VERSION } = require('../bin/crew');
+const { VERSION } = require('./cli/shared'); // not ../bin: the Claude bundle ships bin/ as cli/
 const ledgerModule = require('./ledger/ledger');
 const reducerModule = require('./ledger/reducer');
 const lockModule = require('./ledger/lock');

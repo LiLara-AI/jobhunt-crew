@@ -55,7 +55,7 @@ node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job
 - `crew tool list` prints every tool and its arguments. For long or quoted
   JSON, write it to a file and pass `--args-file <path>` instead of `--args`.
 - If `${CLAUDE_PLUGIN_ROOT}` appears literally (hosts other than Claude), use
-  the plugin root instead: the folder that contains `skills/` and `bin/`.
+  the plugin root instead: the folder that contains `skills/` and `lib/`.
 
 ## Tool reference
 

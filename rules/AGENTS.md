@@ -69,7 +69,8 @@ Keep high-volume scanning and bookkeeping on Flash.
 
 The engine is plain Node.js 18+ with no dependencies. Two folders matter:
 
-- **Plugin root**: the folder holding `bin/`, `lib/`, `skills/`, and this file.
+- **Plugin root**: the folder holding `lib/`, `skills/`, and this file. The
+  `crew.js` entry script sits in `bin/` (repo checkout) or `cli/` (Claude plugin).
   In Claude Code and Cowork it is `${CLAUDE_PLUGIN_ROOT}`. Treat it as
   read-only: it can be replaced on every plugin update.
 - **Workspace**: the user's job-hunt folder holding `.crew/`, `dossier.json`,
