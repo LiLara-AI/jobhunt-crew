@@ -89,5 +89,5 @@ Every `crew_*` tool can be called in one of two ways:
 Lifecycle commands have no MCP tool and use the CLI directly: `init`,
 `doctor`, `ledger replay`, `ledger append`, `claim verify`, `export`, `ui`.
 
-Host setup (MCP registration for Claude Desktop, Codex, Kimi, ChatGPT) is in
-`docs/hosts.md`.
+Host setup (Claude Cowork and Code, Claude Desktop, Codex, Kimi, ChatGPT) is in
+the README section "Install on your app".

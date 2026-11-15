@@ -81,6 +81,17 @@ test('crew_verify_draft records its verdict for a job and rejects a missing draf
   }
 });
 
+test('every shipped version string matches package.json', () => {
+  const root = path.resolve(__dirname, '../..');
+  const version = require(path.join(root, 'package.json')).version;
+  const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.equal(require('../../lib/cli/shared').VERSION, version);
+  assert.equal(require('../../lib/mcp/server').SERVER_VERSION, version);
+  assert.equal(JSON.parse(read('.claude-plugin/plugin.json')).version, version);
+  assert.equal(JSON.parse(read('.claude-plugin/marketplace.json')).plugins[0].version, version);
+  assert.ok(read('lib/command-center/public/index.html').includes(`v${version}</span>`), 'dashboard version tag drifted');
+});
+
 test('parseArgs keeps "=" in values and accepts dash-led values', () => {
   const { flags } = parseArgs(['--url=https://x/j?a=1', '--replacement', '-', '--score', '-5']);
   assert.equal(flags.url, 'https://x/j?a=1');

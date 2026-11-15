@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-labelledby="t d">
+  <title id="t">JobHunt Crew</title>
+  <desc id="d">AI agents that find jobs and tailor honest, claim-verified CVs. Runs in Claude Code, Claude Cowork, ChatGPT, Codex, Kimi Code and Gemini CLI.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.55" stop-color="#132447"/>
+      <stop offset="1" stop-color="#1d3a7a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#60a5fa"/>
+      <stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="340" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="340" rx="18" fill="url(#grid)"/>
+  <circle cx="1130" cy="60" r="160" fill="#60a5fa" fill-opacity="0.07"/>
+  <circle cx="1210" cy="290" r="110" fill="#34d399" fill-opacity="0.06"/>
+
+  <g font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+    <!-- logo mark: briefcase with check -->
+    <g transform="translate(64 62)">
+      <rect x="0" y="14" width="64" height="48" rx="10" fill="none" stroke="url(#accent)" stroke-width="4"/>
+      <path d="M22 14v-6a6 6 0 0 1 6-6h8a6 6 0 0 1 6 6v6" fill="none" stroke="url(#accent)" stroke-width="4"/>
+      <path d="M19 38l9 9 17-18" fill="none" stroke="#34d399" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="148" y="112" font-size="58" font-weight="700" fill="#ffffff">JobHunt Crew</text>
+    <text x="150" y="152" font-size="23" fill="#c7d2fe">AI agents that find jobs and tailor honest, claim-verified CVs.</text>
+    <text x="150" y="182" font-size="17" fill="#93a4c8">Local files · append-only ledger · you click Submit, never the bot.</text>
+
+    <!-- agent chips -->
+    <g font-size="15" font-weight="600">
+      <g transform="translate(64 214)">
+        <rect width="118" height="34" rx="17" fill="#ffffff" fill-opacity="0.08" stroke="#60a5fa" stroke-opacity="0.5"/>
+        <text x="59" y="22" text-anchor="middle" fill="#dbeafe">Dispatcher</text>
+      </g>
+      <g transform="translate(194 214)">
+        <rect width="90" height="34" rx="17" fill="#ffffff" fill-opacity="0.08" stroke="#60a5fa" stroke-opacity="0.5"/>
+        <text x="45" y="22" text-anchor="middle" fill="#dbeafe">Recon</text>
+      </g>
+      <g transform="translate(296 214)">
+        <rect width="88" height="34" rx="17" fill="#ffffff" fill-opacity="0.08" stroke="#34d399" stroke-opacity="0.6"/>
+        <text x="44" y="22" text-anchor="middle" fill="#d1fae5">Scribe</text>
+      </g>
+      <g transform="translate(396 214)">
+        <rect width="118" height="34" rx="17" fill="#ffffff" fill-opacity="0.08" stroke="#34d399" stroke-opacity="0.6"/>
+        <text x="59" y="22" text-anchor="middle" fill="#d1fae5">Inquisitor</text>
+      </g>
+      <g transform="translate(526 214)">
+        <rect width="80" height="34" rx="17" fill="#ffffff" fill-opacity="0.08" stroke="#34d399" stroke-opacity="0.6"/>
+        <text x="40" y="22" text-anchor="middle" fill="#d1fae5">Critic</text>
+      </g>
+      <g transform="translate(618 214)">
+        <rect width="90" height="34" rx="17" fill="#ffffff" fill-opacity="0.08" stroke="#60a5fa" stroke-opacity="0.5"/>
+        <text x="45" y="22" text-anchor="middle" fill="#dbeafe">Liaison</text>
+      </g>
+      <g transform="translate(720 214)">
+        <rect width="112" height="34" rx="17" fill="#ffffff" fill-opacity="0.08" stroke="#60a5fa" stroke-opacity="0.5"/>
+        <text x="56" y="22" text-anchor="middle" fill="#dbeafe">Navigator</text>
+      </g>
+    </g>
+
+    <!-- hosts strip -->
+    <rect x="64" y="270" width="1152" height="1" fill="url(#accent)" fill-opacity="0.5"/>
+    <text x="64" y="306" font-size="16" fill="#93a4c8">Works in</text>
+    <text x="140" y="306" font-size="16" font-weight="600" fill="#e2e8f0">Claude Code  ·  Claude Cowork  ·  Claude Desktop  ·  ChatGPT  ·  Codex  ·  Kimi Code  ·  Gemini CLI</text>
+  </g>
+</svg>

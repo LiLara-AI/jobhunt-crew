@@ -570,8 +570,16 @@
     if (funnelContainer) funnelContainer.innerHTML = funnelHtml;
 
     let html = funnelContainer ? '' : funnelHtml;
+    // Ledger statuses (reducer + triage verdicts) mapped onto board columns;
+    // unknown values fall back to Discovered so no job silently disappears.
+    const STAGE_OF = { shortlisted: 'triaged', parked: 'triaged', pass: 'triaged', fail: 'triaged', preparing: 'drafted', interview: 'screen' };
+    const stageIds = new Set(stages.map(s => s.id));
+    const stageOf = (status) => {
+      const k = String(status || 'discovered').toLowerCase();
+      return STAGE_OF[k] || (stageIds.has(k) ? k : 'discovered');
+    };
     stages.forEach(st => {
-      const colJobs = filteredJobs.filter(j => (j.status || 'discovered').toLowerCase() === st.id);
+      const colJobs = filteredJobs.filter(j => stageOf(j.status) === st.id);
       html += `
         <div class="kanban-column">
           <div class="column-header">
