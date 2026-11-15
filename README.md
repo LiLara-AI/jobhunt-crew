@@ -23,7 +23,7 @@ JobHunt Crew is a local, multi-agent job-search crew that finds roles, tailors h
 
 ## ✨ What it does
 
-| | |
+| Feature | What you get |
 |---|---|
 | 🔎 **Finds jobs** | Sweeps company career pages directly (Greenhouse, Lever, Ashby, Workday, SmartRecruiters, Oracle Cloud, and more) plus your watchlist. Old postings are never auto-dropped. |
 | 📊 **Scores them** | Rates every role 0–5 against your titles, cities, work mode, and hard knockouts. |
