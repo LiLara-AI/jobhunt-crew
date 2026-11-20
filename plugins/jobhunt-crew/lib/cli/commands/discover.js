@@ -14,10 +14,10 @@ const { runLedger } = require('./ledger');
 // boards at all (e.g. the data file loses every slug). Normal sweeps derive
 // their targets dynamically from the KSA watchlist below.
 const FALLBACK_SWEEP_TARGETS = [
-  { provider: 'greenhouse', slug: 'salla', boardToken: 'salla', company: 'Salla' },
-  { provider: 'lever', slug: 'tamara', boardToken: 'tamara', company: 'Tamara' },
-  { provider: 'ashby', slug: 'lean-technologies', boardToken: 'lean-technologies', company: 'Lean Technologies' },
-  { provider: 'smartrecruiters', slug: 'HungerStation', boardToken: 'HungerStation', company: 'HungerStation' }
+  { provider: 'workable', slug: 'salla', boardToken: 'salla', company: 'Salla' },
+  { provider: 'greenhouse', slug: 'tamara', boardToken: 'tamara', company: 'Tamara' },
+  { provider: 'ashby', slug: 'leantech', boardToken: 'leantech', company: 'Lean Technologies' },
+  { provider: 'workable', slug: 'foodics', boardToken: 'foodics', company: 'Foodics' }
 ];
 
 // ATS hosts that carry the board token as the first path segment, keyed by
@@ -33,6 +33,19 @@ const PATH_SLUG_HOSTS = {
   breezy: /(^|\.)breezy\.hr$/,
   breezyhr: /(^|\.)breezy\.hr$/
 };
+
+const GCC_LOCATION = /saudi|\bksa\b|riyadh|jeddah|jidda|dammam|khobar|dhahran|jubail|makkah|mecca|madinah|medina|tabuk|neom|kaec|king abdullah|rabigh|abha|qassim|yanbu|united arab emirates|\buae\b|dubai|abu dhabi|sharjah|qatar|doha|bahrain|manama|kuwait|oman|muscat|السعودية|الرياض|جدة|الدمام/i;
+
+// Plain-text job description from whichever field the ATS uses.
+function jdText(cand) {
+  const raw = cand.rawPayload || {};
+  const html = cand.description || raw.descriptionPlain || raw.description || raw.content ||
+    raw.jobDescription || raw.ShortDescriptionStr || '';
+  return String(html)
+    .replace(/&amp;/g, '&') // Greenhouse double-encodes: decode &amp; first
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 4000);
+}
 
 function slugFromCareersUrl(provider, careersUrl) {
   if (!careersUrl || typeof careersUrl !== 'string') return null;
@@ -83,17 +96,22 @@ function getDefaultSweepTargets(watchlist) {
       .toLowerCase().replace(/[^a-z]/g, '');
     if (!provider || !ATS_REGISTRY[provider]) continue;
 
-    const slug = entry.boardToken || entry.slug || entry.atsSlug || entry.board ||
+    const objTarget = entry.target && typeof entry.target === 'object' ? entry.target : null;
+    const slug = (objTarget && (objTarget.tenant || objTarget.slug || objTarget.host)) ||
+      (typeof entry.target === 'string' && entry.target) ||
+      entry.boardToken || entry.slug || entry.atsSlug || entry.board ||
       entry.organization || slugFromCareersUrl(provider, entry.careersUrl || entry.url);
     if (!slug || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(String(slug))) continue;
 
-    const key = `${provider}:${String(slug).toLowerCase()}`;
+    const key = `${provider}:${String(slug).toLowerCase()}${objTarget ? ':' + (objTarget.country || objTarget.site || '') : ''}`;
     if (seen.has(key)) continue;
     seen.add(key);
     targets.push({
       provider,
       slug: String(slug),
       boardToken: String(slug),
+      target: objTarget ? { slug: entry.id, ...objTarget, company: entry.name } : String(slug),
+      gccOnly: entry.gccOnly === true,
       company: entry.name || entry.id || String(slug)
     });
   }
@@ -116,6 +134,17 @@ async function runDiscover(subcommand, rawArgs = []) {
       throw new Error('Offline fixtures are only available in a source checkout (tests/fixtures missing). Check network access to the job board, or run from a source checkout.');
     }
   };
+
+  // Watchlist employers with no public job feed (SuccessFactors, Talentera,
+  // custom portals): these need an attended browser visit, not an API sweep.
+  if (subcommand === 'manual') {
+    const { KsaCountryPack } = require('../../discovery/ksa-pack');
+    const manual = KsaCountryPack.getWatchlist().filter(e => e.provider === 'manual')
+      .map(e => ({ id: e.id, name: e.name, careersUrl: e.careersUrl, system: e.ats || null }));
+    if (isJson) console.log(JSON.stringify(manual, null, 2));
+    else for (const m of manual) console.log(`${m.name}: ${m.careersUrl}${m.system ? ` (${m.system})` : ''}`);
+    return 0;
+  }
 
   if (subcommand === 'smoke') {
     const atsProvider = flags.ats || 'greenhouse';
@@ -191,7 +220,8 @@ async function runDiscover(subcommand, rawArgs = []) {
     const atsFilter = (flags.ats || flags.provider)
       ? String(flags.ats || flags.provider).toLowerCase().replace(/[^a-z]/g, '')
       : null;
-    const limit = flags.limit ? parseInt(flags.limit, 10) : 50;
+    // No cap by default: a cap of 50 silently dropped every board after the first big one.
+    const limit = flags.limit ? parseInt(flags.limit, 10) : 0;
 
     console.log(`[SWEEP] Starting job discovery sweep (mode: ${isOffline ? 'offline fixtures' : 'standard'})...`);
 
@@ -233,19 +263,25 @@ async function runDiscover(subcommand, rawArgs = []) {
         : getDefaultSweepTargets();
       console.log(`[SWEEP] Targets: ${targets.length} ATS board(s)${boardFlag ? ' (flag override)' : ' from KSA watchlist'}.`);
 
+      const failed = [];
       for (const t of targets) {
         if (atsFilter && t.provider !== atsFilter) continue;
         try {
-          const res = await engine.sweepAts(t.provider, t.slug, { maxPages: 1, limit: 10, timeoutMs: 5000 });
+          let res = await engine.sweepAts(t.provider, t.target || t.slug, { maxPages: 10, timeoutMs: 15000, maxRetries: 1, company: t.company });
+          // Multinational boards: keep only Gulf-based roles.
+          if (t.gccOnly) res = res.filter(j => GCC_LOCATION.test(String(j.location || '') + ' ' + String(j.title || '')));
+          console.log(`[SWEEP]   ${t.company} (${t.provider}): ${res.length} job(s)`);
           discoveredCandidates.push(...res);
         } catch (err) {
+          failed.push(t.company);
+          console.log(`[SWEEP]   WARNING ${t.company} (${t.provider}): ${err.message}`);
           await runLedger('append', [
             '--event', 'SOURCE_DEGRADED',
             '--payload', JSON.stringify({
               source: t.provider,
               domain: `${t.slug}.${t.provider}.io`,
               reason: 'NETWORK_UNREACHABLE',
-              statusCode: 500,
+              statusCode: err.statusCode || 500,
               attempts: 1,
               message: err.message
             }),
@@ -254,9 +290,16 @@ async function runDiscover(subcommand, rawArgs = []) {
           ]);
         }
       }
+      if (!boardFlag) {
+        console.log('[SWEEP] Employers without a public job feed are not swept; list their careers pages with: crew discover manual');
+      }
+      if (failed.length > 0) {
+        console.log(`[SWEEP] ${failed.length} board(s) could not be read: ${failed.join(', ')}. These are NOT empty boards; check them by hand.`);
+      }
     }
 
     if (limit > 0 && discoveredCandidates.length > limit) {
+      console.log(`[SWEEP] --limit ${limit}: keeping ${limit} of ${discoveredCandidates.length} job(s) found.`);
       discoveredCandidates = discoveredCandidates.slice(0, limit);
     }
 
@@ -295,6 +338,7 @@ async function runDiscover(subcommand, rawArgs = []) {
         department: cand.department,
         compensation: cand.compensation,
         postedAt: cand.postedAt,
+        description: jdText(cand),
         postedAgeDays: cand.postedAt ? Math.max(0, Math.floor((Date.now() - new Date(cand.postedAt).getTime()) / 86400000)) : 0,
         rawPayload: cand.rawPayload
       };

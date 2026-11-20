@@ -208,6 +208,8 @@ async function runInterviewStory(rawArgs = []) {
   }
   try {
     const bank = new StarRStoryBank(dossier);
+    // Stories added through crew_interview_story; required here so other commands do not load the MCP server.
+    require('../../mcp/server').loadSavedStories(targetDir, bank);
     const selected = flags.storyIds
       ? String(flags.storyIds).split(',').map(s => s.trim()).filter(Boolean)
       : null;
@@ -272,7 +274,10 @@ async function runKsaOffer(rawArgs = []) {
         basic,
         housing,
         transport,
-        isSaudiNational: isSaudi,
+        // Without --saudi the evaluation reports the expatriate default as an assumption.
+        isSaudiNational: isSaudi || undefined,
+        tenureYears: flags.tenure !== undefined ? Number(flags.tenure) : undefined,
+        separationType: flags.separation,
         probationDays: flags.probation !== undefined ? Number(flags.probation) : undefined,
         nonCompeteMonths: flags['non-compete'] !== undefined ? Number(flags['non-compete']) : undefined,
         nonCompeteScope: flags['non-compete-scope'],

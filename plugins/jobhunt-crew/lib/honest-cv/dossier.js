@@ -25,8 +25,9 @@ class CareerDossier {
     const cand = raw.candidate || {};
     this.candidate = {
       name: cand.name || '[Candidate Name]',
-      email: cand.email || 'user@example.org',
-      phone: cand.phone || '+1 555-0100',
+      // Missing contact details stay empty: apply packs pre-fill these into real forms.
+      email: cand.email || '',
+      phone: cand.phone || '',
       location: cand.location || '',
       workAuthorization: cand.workAuthorization || '',
       noticePeriodDays: typeof cand.noticePeriodDays === 'number' ? cand.noticePeriodDays : 30,
@@ -70,7 +71,9 @@ class CareerDossier {
         tools: Array.isArray(c.tools) ? c.tools.map(String)
           : (Array.isArray(c.technologies) ? c.technologies.map(String) : []),
         role: String(c.role || ''),
-        status: (c.status === 'CONFIRM' ? 'CONFIRM' : 'VERIFIED'),
+        // Only VERIFIED (or a legacy claim with no status at all) is verified;
+        // any other value ("pending", "DRAFT", ...) stays gated as CONFIRM.
+        status: (c.status == null || c.status === 'VERIFIED') ? 'VERIFIED' : 'CONFIRM',
         evidence: c.evidence ? String(c.evidence) : null,
         clarificationPrompt: c.clarificationPrompt ? String(c.clarificationPrompt) : null,
         updatedAt: c.updatedAt || new Date().toISOString()
@@ -283,16 +286,18 @@ class CareerDossier {
 
   exportForBlindReview() {
     // Strips candidate name, email, phone, private salary floor, and claim tags
-    const scrubbedSummary = this.candidate.summary
-      .replace(new RegExp(this.candidate.name, 'gi'), 'Candidate')
-      .replace(new RegExp(this.candidate.email, 'gi'), '[email]')
-      .replace(new RegExp(this.candidate.phone.replace(/\+/g, '\\+'), 'gi'), '[phone]');
+    // Escaped, and empty values skipped: an empty pattern would match between every character.
+    const esc = (v) => String(v).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    let scrubbedSummary = this.candidate.summary;
+    for (const [value, label] of [[this.candidate.name, 'Candidate'], [this.candidate.email, '[email]'], [this.candidate.phone, '[phone]']]) {
+      if (value) scrubbedSummary = scrubbedSummary.replace(new RegExp(esc(value), 'gi'), label);
+    }
 
     const scrubbedClaims = this.claims.map(c => {
       // Remove tag brackets if present in text
       let text = c.text.replace(/\[(?:CLM|C|ALX|MV)-\d+\]/gi, '').trim();
       if (this.candidate.name) {
-        text = text.replace(new RegExp(this.candidate.name, 'gi'), 'Candidate');
+        text = text.replace(new RegExp(esc(this.candidate.name), 'gi'), 'Candidate');
       }
       return {
         category: c.category,
@@ -785,8 +790,8 @@ class CareerDossier {
       updatedAt: new Date().toISOString(),
       candidate: {
         name: '[Candidate Name]',
-        email: 'user@example.org',
-        phone: '+1 555-0100',
+        email: '',
+        phone: '',
         location: 'City, Country',
         workAuthorization: 'Authorized',
         noticePeriodDays: 30,
@@ -819,8 +824,9 @@ class CareerDossier {
           metrics: ['40%'],
           tools: ['Node.js', 'PostgreSQL'],
           role: 'Senior Software Engineer',
-          status: 'VERIFIED',
-          evidence: 'Production metric audit'
+          // Placeholder text is never a verified fact.
+          status: 'CONFIRM',
+          clarificationPrompt: 'Template placeholder — replace with a real accomplishment'
         }
       ],
       degrees: [],
@@ -840,8 +846,8 @@ class CareerDossier {
         schedule: { startHour: 8, timezone: 'Asia/Riyadh', autoPrep: false }
       },
       claimVerificationAppendix: {
-        verifiedCount: 1,
-        pendingCount: 0,
+        verifiedCount: 0,
+        pendingCount: 1,
         verificationLog: []
       }
     });

@@ -21,7 +21,9 @@ class OracleCloudAdapter extends BaseAtsAdapter {
    * Parses Oracle Cloud HCM response into normalized jobs.
    */
   static parseJobs(data, tenant = 'tenant', options = {}) {
-    const items = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
+    let items = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
+    // Live Candidate Experience shape: items[0] is the search, jobs are in requisitionList.
+    if (items[0] && Array.isArray(items[0].requisitionList)) items = items[0].requisitionList;
     const company = options.company || tenant;
 
     return items
@@ -47,7 +49,9 @@ class OracleCloudAdapter extends BaseAtsAdapter {
         remoteStatus = 'onsite';
       }
 
-      const rawUrl = item.ExternalURL || `https://careers.${tenant}.com/job/${reqId}`;
+      const rawUrl = item.ExternalURL || (options.host && options.site
+        ? `https://${options.host}/hcmUI/CandidateExperience/en/sites/${options.site}/job/${reqId}`
+        : `https://careers.${tenant}.com/job/${reqId}`);
       const cleanUrl = normalizeJobUrl(rawUrl);
 
       return {
@@ -76,7 +80,10 @@ class OracleCloudAdapter extends BaseAtsAdapter {
     const limit = options.limit || 25;
 
     const allNormalized = await this.paginate(async ({ offset }) => {
-      const endpoint = `${base}/hcmRestApi/resources/latest/recruitingCEJobRequisitions?onlyData=true&expand=all&limit=${limit}&offset=${offset}`;
+      // Real Oracle career sites only answer the findReqs finder scoped to a site number.
+      const endpoint = options.site
+        ? `${base}/hcmRestApi/resources/latest/recruitingCEJobRequisitions?onlyData=true&expand=requisitionList&finder=findReqs;siteNumber=${encodeURIComponent(options.site)},limit=${limit},offset=${offset}`
+        : `${base}/hcmRestApi/resources/latest/recruitingCEJobRequisitions?onlyData=true&expand=all&limit=${limit}&offset=${offset}`;
       const res = await this.fetchWithRetry(endpoint, options);
 
       if (!res.success || !res.data) {
@@ -84,7 +91,10 @@ class OracleCloudAdapter extends BaseAtsAdapter {
       }
 
       const jobs = OracleCloudAdapter.parseJobs(res.data, tenant, options);
-      const hasMore = res.data.hasMore === true || ((offset + limit) < (res.data.totalResults || 0));
+      const search = Array.isArray(res.data.items) && res.data.items[0] && Array.isArray(res.data.items[0].requisitionList) ? res.data.items[0] : null;
+      const hasMore = search
+        ? (offset + limit) < (search.TotalJobsCount || 0)
+        : (res.data.hasMore === true || ((offset + limit) < (res.data.totalResults || 0)));
 
       return {
         items: jobs,

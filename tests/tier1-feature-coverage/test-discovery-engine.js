@@ -269,7 +269,8 @@ suite.test('KSA Watchlist Registry contains 40+ strategic entities across target
   const neom = registry.findByCompanyName('NEOM Tech & Digital');
   assert.ok(neom !== null, 'NEOM matched by name');
   assert.equal(neom.category, 'giga_project');
-  assert.equal(neom.provider, 'oraclecloud');
+  // NEOM publishes no job feed (verified live); it is a browser-check employer.
+  assert.equal(neom.provider, 'manual');
 
   // Test Red Sea Global
   const rsg = registry.findByCompanyName('Red Sea Global');
@@ -404,7 +405,7 @@ suite.test('BrowserSweeps provides attended guidance and read-only session check
     const spec = BrowserSweeps.getBoardSpec(b);
     assert.ok(spec !== null, `Board spec exists for ${b}`);
     assert.ok(spec.loginUrl.startsWith('https://'), `Valid login URL for ${b}`);
-    assert.ok(spec.searchUrlTemplate.includes('{query}'), `Valid search template for ${b}`);
+    assert.ok(/\{query(Slug)?\}/.test(spec.searchUrlTemplate), `Valid search template for ${b}`);
     assert.equal(typeof spec.checkSessionSelectors, 'object', `Selectors defined for ${b}`);
   }
 

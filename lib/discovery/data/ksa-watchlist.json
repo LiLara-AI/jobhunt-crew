@@ -4,8 +4,8 @@
     "name": "NEOM",
     "nameAr": "نيوم",
     "category": "giga_project",
-    "provider": "oraclecloud",
-    "careersUrl": "https://careers.neom.com",
+    "provider": "manual",
+    "careersUrl": "https://www.neom.com/en-us/be-part-of-neom/work-at-neom",
     "primaryCity": "NEOM",
     "cities": [
       "Tabuk",
@@ -21,15 +21,16 @@
       "نيوم"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "No job-search link on the careers page at test time"
   },
   {
     "id": "red-sea-global",
     "name": "Red Sea Global",
     "nameAr": "البحر الأحمر الدولية",
     "category": "giga_project",
-    "provider": "oraclecloud",
-    "careersUrl": "https://careers.redseaglobal.com",
+    "provider": "manual",
+    "careersUrl": "https://careers.theredsea.sa/go/Job-Opportunities/7716923/",
     "primaryCity": "Tabuk",
     "cities": [
       "Red Sea",
@@ -44,15 +45,16 @@
       "البحر الاحمر الدولية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "qiddiya",
     "name": "Qiddiya Investment Company",
     "nameAr": "شركة القدية للاستثمار",
     "category": "giga_project",
-    "provider": "oraclecloud",
-    "careersUrl": "https://careers.qiddiya.com",
+    "provider": "workable",
+    "careersUrl": "https://apply.workable.com/qiddiya-investment-company-1/",
     "primaryCity": "Qiddiya",
     "cities": [
       "Riyadh"
@@ -63,7 +65,8 @@
       "مشروع القدية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": "qiddiya-investment-company-1"
   },
   {
     "id": "roshn",
@@ -71,7 +74,7 @@
     "nameAr": "روشن",
     "category": "giga_project",
     "provider": "oraclecloud",
-    "careersUrl": "https://careers.roshn.sa",
+    "careersUrl": "https://fa-epph-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah",
@@ -84,15 +87,19 @@
       "روشن العقارية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": {
+      "host": "fa-epph-saasfaprod1.fa.ocs.oraclecloud.com",
+      "site": "CX_1"
+    }
   },
   {
     "id": "diriyah",
     "name": "Diriyah Company",
     "nameAr": "شركة الدرعية",
     "category": "giga_project",
-    "provider": "oraclecloud",
-    "careersUrl": "https://careers.diriyah.sa",
+    "provider": "manual",
+    "careersUrl": "https://www.diriyahcompany.sa/en/careers",
     "primaryCity": "Diriyah",
     "cities": [
       "Riyadh"
@@ -104,15 +111,16 @@
       "الدرعية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "pif",
     "name": "Public Investment Fund",
     "nameAr": "صندوق الاستثمارات العامة",
     "category": "sovereign_wealth",
-    "provider": "workday",
-    "careersUrl": "https://pif.gov.sa/en/careers",
+    "provider": "oraclecloud",
+    "careersUrl": "https://www.pif.gov.sa/en/careers/",
     "primaryCity": "Riyadh",
     "cities": [
       "London",
@@ -125,7 +133,11 @@
       "صندوق الاستثمارات العامة"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": {
+      "host": "fa-esgl-saasfaprod1.fa.ocs.oraclecloud.com",
+      "site": "CX_1001"
+    }
   },
   {
     "id": "new-murabba",
@@ -133,7 +145,7 @@
     "nameAr": "شركة تطوير المربع الجديد",
     "category": "giga_project",
     "provider": "oraclecloud",
-    "careersUrl": "https://newmurabba.com/en/careers",
+    "careersUrl": "https://careers.newmurabba.com/en/sites/CX_3001/jobs",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -143,7 +155,11 @@
       "Mukaab"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": {
+      "host": "fa-exjc-saasfaprod1.fa.ocs.oraclecloud.com",
+      "site": "CX_3001"
+    }
   },
   {
     "id": "soudah",
@@ -151,7 +167,7 @@
     "nameAr": "السودة للتطوير",
     "category": "giga_project",
     "provider": "oraclecloud",
-    "careersUrl": "https://soudah.sa/en/careers",
+    "careersUrl": "https://soudah.sa/en/work-with-us",
     "primaryCity": "Abha",
     "cities": [
       "Asir",
@@ -163,15 +179,19 @@
       "قمم السودة"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": {
+      "host": "fa-eueh-saasfaprod1.fa.ocs.oraclecloud.com",
+      "site": "CX_1"
+    }
   },
   {
     "id": "rua-al-madinah",
     "name": "Rua Al Madinah Holding",
     "nameAr": "رؤى المدينة القابضة",
     "category": "giga_project",
-    "provider": "oraclecloud",
-    "careersUrl": "https://ruaalmadinah.com/careers",
+    "provider": "manual",
+    "careersUrl": "https://talent.ruaalmadinah.com/Careers/search",
     "primaryCity": "Madinah",
     "cities": [
       "Riyadh"
@@ -181,15 +201,16 @@
       "Rua AlMadinah"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "Custom talent portal"
   },
   {
     "id": "riyadh-air",
     "name": "Riyadh Air",
     "nameAr": "طيران الرياض",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://careers.riyadhair.com",
+    "provider": "manual",
+    "careersUrl": "https://careers-riyadhair.icims.com/jobs/search",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -197,15 +218,16 @@
       "طيران الرياض"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "iCIMS"
   },
   {
     "id": "alat",
     "name": "Alat",
     "nameAr": "آلات",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://alat.com/en-us/careers",
+    "provider": "manual",
+    "careersUrl": "https://alat.com/en/careers/apply/",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -214,15 +236,16 @@
       "آلات السعودية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "No job board: careers page links to a general application fo"
   },
   {
     "id": "humain",
     "name": "HUMAIN",
     "nameAr": "هيومان",
     "category": "national_champion",
-    "provider": "oraclecloud",
-    "careersUrl": "https://scai.sa/careers",
+    "provider": "manual",
+    "careersUrl": "https://www.humain.com/careers",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -231,15 +254,16 @@
       "Saudi Company for AI"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "Custom JS careers page, no ATS link found"
   },
   {
     "id": "saudi-aramco",
     "name": "Saudi Aramco",
     "nameAr": "أرامكو السعودية",
     "category": "national_champion",
-    "provider": "successfactors",
-    "careersUrl": "https://www.aramco.com/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://careers.aramco.com/",
     "primaryCity": "Dhahran",
     "cities": [
       "Riyadh",
@@ -252,15 +276,16 @@
       "أرامكو السعودية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "aramco-digital",
     "name": "Aramco Digital",
     "nameAr": "أرامكو الرقمية",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://aramcodigital.com/careers",
+    "provider": "oraclecloud",
+    "careersUrl": "https://fa-exrn-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_3001",
     "primaryCity": "Dhahran",
     "cities": [
       "Riyadh"
@@ -270,15 +295,19 @@
       "أرامكو الرقمية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": {
+      "host": "fa-exrn-saasfaprod1.fa.ocs.oraclecloud.com",
+      "site": "CX_3001"
+    }
   },
   {
     "id": "stc",
     "name": "STC (Saudi Telecom Company)",
     "nameAr": "شركة الاتصالات السعودية",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://careers.stc.com.sa",
+    "provider": "manual",
+    "careersUrl": "https://careers.stc.com.sa/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah",
@@ -290,15 +319,16 @@
       "الاتصالات السعودية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "solutions-by-stc",
     "name": "Solutions by stc",
     "nameAr": "سلوشنز من إس تي سي",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://solutions.com.sa/careers",
+    "provider": "manual",
+    "careersUrl": "https://solutions.com.sa/careers/",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -307,15 +337,16 @@
       "سلوشنز للاتصالات"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "sirar-by-stc",
     "name": "Sirar by stc",
     "nameAr": "سرار من إس تي سي",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://sirar.com.sa/careers",
+    "provider": "manual",
+    "careersUrl": "https://www.sirar.com.sa/about-us/careers/",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -324,15 +355,16 @@
       "سرار"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "Careers page only links to LinkedIn jobs"
   },
   {
     "id": "sabic",
     "name": "SABIC",
     "nameAr": "سابك",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://careers.sabic.com",
+    "provider": "manual",
+    "careersUrl": "https://jobs.sabic.com/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jubail",
@@ -344,15 +376,16 @@
       "سابك"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "almarai",
     "name": "Almarai Company",
     "nameAr": "شركة المراعي",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://almarai.com/en/corporate/careers",
+    "provider": "manual",
+    "careersUrl": "https://www.almarai.com/en/careers",
     "primaryCity": "Riyadh",
     "cities": [
       "Al Kharj"
@@ -362,15 +395,16 @@
       "شركة المراعي المحدودة"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "elm",
     "name": "Elm",
     "nameAr": "شركة علم",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://elm.sa/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://career.elm.sa/",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -379,15 +413,16 @@
       "شركة علم"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "maaden",
     "name": "Ma'aden",
     "nameAr": "شركة معادن",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://maaden.com.sa/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://careers.maaden.com/gb/en",
     "primaryCity": "Riyadh",
     "cities": [
       "Ras Al Khair",
@@ -399,15 +434,16 @@
       "معادن"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "Phenom People career site"
   },
   {
     "id": "acwa-power",
     "name": "ACWA Power",
     "nameAr": "أكوا باور",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://acwapower.com/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://careers.acwapower.com/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah"
@@ -417,15 +453,16 @@
       "ACWA"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "bupa-arabia",
     "name": "Bupa Arabia",
     "nameAr": "بوبا العربية",
     "category": "national_champion",
-    "provider": "workday",
-    "careersUrl": "https://bupa.com.sa/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://careers.bupa.com.sa/",
     "primaryCity": "Jeddah",
     "cities": [
       "Riyadh",
@@ -436,15 +473,16 @@
       "بوبا العربية للتأمين"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "Talentera"
   },
   {
     "id": "saudi-electricity",
     "name": "Saudi Electricity Company",
     "nameAr": "الشركة السعودية للكهرباء",
     "category": "national_champion",
-    "provider": "oraclecloud",
-    "careersUrl": "https://se.com.sa/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://jobs.se.com.sa/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah",
@@ -456,15 +494,16 @@
       "الشركة السعودية للكهرباء"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "al-rajhi-bank",
     "name": "Al Rajhi Bank",
     "nameAr": "مصرف الراجحي",
     "category": "banking_finance",
-    "provider": "oraclecloud",
-    "careersUrl": "https://careers.alrajhibank.com.sa",
+    "provider": "manual",
+    "careersUrl": "https://careers.alrajhibank.com.sa/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah",
@@ -477,15 +516,16 @@
       "مصرف الراجحي"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "Talentera"
   },
   {
     "id": "snb",
     "name": "Saudi National Bank (SNB)",
     "nameAr": "البنك الأهلي السعودي",
     "category": "banking_finance",
-    "provider": "workday",
-    "careersUrl": "https://alahli.com/en-us/about-us/careers",
+    "provider": "manual",
+    "careersUrl": "https://www.alahli.com/en/pages/about-us/careers",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah"
@@ -497,15 +537,16 @@
       "SNB"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "Oracle E-Business iRecruitment at snbtalent"
   },
   {
     "id": "riyad-bank",
     "name": "Riyad Bank",
     "nameAr": "بنك الرياض",
     "category": "banking_finance",
-    "provider": "oraclecloud",
-    "careersUrl": "https://riyadbank.com/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://careers.riyadbank.com/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah",
@@ -516,7 +557,8 @@
       "RiyadBank"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "Talentera"
   },
   {
     "id": "banque-saudi-fransi",
@@ -524,7 +566,7 @@
     "nameAr": "البنك السعودي الفرنسي",
     "category": "banking_finance",
     "provider": "oraclecloud",
-    "careersUrl": "https://alfransi.com.sa/en/careers",
+    "careersUrl": "https://fa-epje-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/BSFCareers/jobs",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah"
@@ -535,15 +577,19 @@
       "السعودي الفرنسي"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "target": {
+      "host": "fa-epje-saasfaprod1.fa.ocs.oraclecloud.com",
+      "site": "CX_2001"
+    }
   },
   {
     "id": "sab",
     "name": "Saudi Awwal Bank (SAB)",
     "nameAr": "البنك السعودي الأول",
     "category": "banking_finance",
-    "provider": "workday",
-    "careersUrl": "https://sab.com/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://careers.sab.com/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah",
@@ -556,15 +602,16 @@
       "البنك السعودي الأول"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "SAP SuccessFactors"
   },
   {
     "id": "alinma-bank",
     "name": "Alinma Bank",
     "nameAr": "مصرف الإنماء",
     "category": "banking_finance",
-    "provider": "oraclecloud",
-    "careersUrl": "https://alinma.com/en/careers",
+    "provider": "manual",
+    "careersUrl": "https://career.alinma.com/",
     "primaryCity": "Riyadh",
     "cities": [
       "Jeddah"
@@ -574,15 +621,16 @@
       "مصرف الإنماء"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "Custom portal"
   },
   {
     "id": "tamara",
     "name": "Tamara",
     "nameAr": "تمارا",
     "category": "tech_unicorn",
-    "provider": "lever",
-    "careersUrl": "https://jobs.lever.co/tamara",
+    "provider": "greenhouse",
+    "careersUrl": "https://boards.greenhouse.io/tamara",
     "primaryCity": "Riyadh",
     "cities": [
       "Dubai",
@@ -594,15 +642,16 @@
       "تمارا"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": "tamara"
   },
   {
     "id": "tabby",
     "name": "Tabby",
     "nameAr": "تابي",
     "category": "tech_unicorn",
-    "provider": "lever",
-    "careersUrl": "https://jobs.lever.co/tabby",
+    "provider": "manual",
+    "careersUrl": "https://tabby.pinpointhq.com/",
     "primaryCity": "Riyadh",
     "cities": [
       "Dubai"
@@ -613,14 +662,15 @@
       "تابي"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "Pinpoint ATS"
   },
   {
     "id": "jahez",
     "name": "Jahez",
     "nameAr": "جاهز",
     "category": "tech_unicorn",
-    "provider": "smartrecruiters",
+    "provider": "manual",
     "careersUrl": "https://careers.smartrecruiters.com/Jahez",
     "primaryCity": "Riyadh",
     "cities": [],
@@ -630,7 +680,8 @@
       "جاهز للاتصالات وتقنية المعلومات"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "ats": "jahez"
   },
   {
     "id": "hungerstation",
@@ -638,7 +689,7 @@
     "nameAr": "هنقرستيشن",
     "category": "tech_unicorn",
     "provider": "smartrecruiters",
-    "careersUrl": "https://careers.smartrecruiters.com/HungerStation",
+    "careersUrl": "https://careers.smartrecruiters.com/DeliveryHero",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -647,15 +698,19 @@
       "Hungerstation Delivery"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": {
+      "slug": "deliveryhero",
+      "country": "sa"
+    }
   },
   {
     "id": "salla",
     "name": "Salla",
     "nameAr": "سلة",
     "category": "tech_unicorn",
-    "provider": "greenhouse",
-    "careersUrl": "https://boards.greenhouse.io/salla",
+    "provider": "workable",
+    "careersUrl": "https://apply.workable.com/salla/",
     "primaryCity": "Makkah",
     "cities": [
       "Riyadh"
@@ -666,15 +721,16 @@
       "سلة للتجارة الإلكترونية"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": "salla"
   },
   {
     "id": "zid",
     "name": "Zid",
     "nameAr": "زد",
     "category": "scaleup",
-    "provider": "bamboohr",
-    "careersUrl": "https://zid.bamboohr.com/careers",
+    "provider": "manual",
+    "careersUrl": "https://zid.sa/en/careers/",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -683,15 +739,16 @@
       "زد"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "JS-rendered page with no ATS link"
   },
   {
     "id": "foodics",
     "name": "Foodics",
     "nameAr": "فودكس",
     "category": "scaleup",
-    "provider": "greenhouse",
-    "careersUrl": "https://boards.greenhouse.io/foodics",
+    "provider": "workable",
+    "careersUrl": "https://apply.workable.com/foodics/",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -699,7 +756,8 @@
       "فودكس POS"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "target": "foodics"
   },
   {
     "id": "lean-technologies",
@@ -707,7 +765,7 @@
     "nameAr": "لين تكنولوجيز",
     "category": "scaleup",
     "provider": "ashby",
-    "careersUrl": "https://jobs.ashbyhq.com/lean-technologies",
+    "careersUrl": "https://jobs.ashbyhq.com/leantech",
     "primaryCity": "Riyadh",
     "cities": [
       "Dubai"
@@ -718,15 +776,16 @@
       "لين"
     ],
     "tier1": true,
-    "enabled": true
+    "enabled": true,
+    "target": "leantech"
   },
   {
     "id": "mozn",
     "name": "Mozn",
     "nameAr": "مزن",
     "category": "scaleup",
-    "provider": "greenhouse",
-    "careersUrl": "https://boards.greenhouse.io/mozn",
+    "provider": "workable",
+    "careersUrl": "https://apply.workable.com/mozn-ai/",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -735,15 +794,16 @@
       "مزن"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "target": "mozn-ai"
   },
   {
     "id": "nana",
     "name": "Nana",
     "nameAr": "نعناع",
     "category": "scaleup",
-    "provider": "lever",
-    "careersUrl": "https://jobs.lever.co/nana",
+    "provider": "manual",
+    "careersUrl": "https://nana.sa/careers",
     "primaryCity": "Riyadh",
     "cities": [],
     "aliases": [
@@ -752,15 +812,16 @@
       "شركة نعناع"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "Page links to hiring"
   },
   {
     "id": "floward",
     "name": "Floward",
     "nameAr": "فلاورد",
     "category": "scaleup",
-    "provider": "greenhouse",
-    "careersUrl": "https://boards.greenhouse.io/floward",
+    "provider": "manual",
+    "careersUrl": "https://careers.floward.com",
     "primaryCity": "Riyadh",
     "cities": [
       "Kuwait",
@@ -771,6 +832,176 @@
       "فلاورد"
     ],
     "tier1": false,
-    "enabled": true
+    "enabled": true,
+    "ats": "Talentera"
+  },
+  {
+    "id": "careem",
+    "name": "Careem",
+    "nameAr": "كريم",
+    "category": "tech_unicorn",
+    "primaryCity": "Dubai",
+    "cities": [
+      "Riyadh",
+      "Jeddah"
+    ],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "greenhouse",
+    "careersUrl": "https://boards.greenhouse.io/careem",
+    "target": "careem",
+    "gccOnly": true
+  },
+  {
+    "id": "talabat",
+    "name": "talabat (Delivery Hero)",
+    "nameAr": "طلبات",
+    "category": "tech_unicorn",
+    "primaryCity": "Dubai",
+    "cities": [
+      "Kuwait City",
+      "Doha",
+      "Manama",
+      "Muscat"
+    ],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "smartrecruiters",
+    "careersUrl": "https://careers.smartrecruiters.com/DeliveryHero",
+    "target": {
+      "slug": "deliveryhero",
+      "country": "ae"
+    }
+  },
+  {
+    "id": "unifonic",
+    "name": "Unifonic",
+    "nameAr": "يونيفونك",
+    "category": "scaleup",
+    "primaryCity": "Riyadh",
+    "cities": [
+      "Dubai"
+    ],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "recruitee",
+    "careersUrl": "https://unifonic.recruitee.com/",
+    "target": "unifonic"
+  },
+  {
+    "id": "lucidya",
+    "name": "Lucidya",
+    "nameAr": "لوسيديا",
+    "category": "scaleup",
+    "primaryCity": "Riyadh",
+    "cities": [],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "workable",
+    "careersUrl": "https://apply.workable.com/lucidya/",
+    "target": "lucidya"
+  },
+  {
+    "id": "thmanyah",
+    "name": "Thmanyah",
+    "nameAr": "ثمانية",
+    "category": "scaleup",
+    "primaryCity": "Riyadh",
+    "cities": [],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "recruitee",
+    "careersUrl": "https://thmanyah.recruitee.com/",
+    "target": "thmanyah"
+  },
+  {
+    "id": "jisr",
+    "name": "Jisr",
+    "nameAr": "جسر",
+    "category": "scaleup",
+    "primaryCity": "Riyadh",
+    "cities": [],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "smartrecruiters",
+    "careersUrl": "https://careers.smartrecruiters.com/jisr",
+    "target": "jisr",
+    "gccOnly": true
+  },
+  {
+    "id": "namshi",
+    "name": "Namshi",
+    "nameAr": "نمشي",
+    "category": "scaleup",
+    "primaryCity": "Dubai",
+    "cities": [
+      "Riyadh"
+    ],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "smartrecruiters",
+    "careersUrl": "https://careers.smartrecruiters.com/namshi",
+    "target": "namshi"
+  },
+  {
+    "id": "toyou",
+    "name": "ToYou",
+    "nameAr": "تويو",
+    "category": "scaleup",
+    "primaryCity": "Riyadh",
+    "cities": [
+      "Jeddah"
+    ],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "bamboohr",
+    "careersUrl": "https://toyou.bamboohr.com/careers",
+    "target": "toyou"
+  },
+  {
+    "id": "lucid-motors",
+    "name": "Lucid Motors",
+    "nameAr": "لوسيد",
+    "category": "national_champion",
+    "primaryCity": "KAEC",
+    "cities": [
+      "Riyadh",
+      "Jeddah"
+    ],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "greenhouse",
+    "careersUrl": "https://boards.greenhouse.io/lucidmotors",
+    "target": "lucidmotors",
+    "gccOnly": true
+  },
+  {
+    "id": "mobily",
+    "name": "Mobily",
+    "nameAr": "موبايلي",
+    "category": "national_champion",
+    "primaryCity": "Riyadh",
+    "cities": [
+      "Jeddah",
+      "Dammam"
+    ],
+    "aliases": [],
+    "tier1": false,
+    "enabled": true,
+    "provider": "oraclecloud",
+    "careersUrl": "https://careers.mobily.com.sa/en/sites/opportunities/jobs",
+    "target": {
+      "host": "careers.mobily.com.sa",
+      "site": "CX_4002"
+    }
   }
 ]

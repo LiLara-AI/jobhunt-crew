@@ -6,6 +6,7 @@
  * Implements statutory labor law computations:
  * - 65% Basic / 25% Housing / 10% Transportation salary breakdown.
  * - GOSI contributions (21.5% for Saudi nationals; 2% occupational hazards for expats; 45k cap).
+ *   Nationality defaults to non-Saudi (expatriate) unless isSaudiNational is true.
  * - Article 53 Probation validation (90-180 days statutory limits).
  * - Article 84 & 85 End-of-Service Benefits (EOSB) tenure accrual and resignation curves.
  * - Article 83 Non-compete enforceability analysis.
@@ -68,6 +69,7 @@ class KsaOfferCalculator {
     let housing = 0;
     let transport = 0;
     let splitSource = 'default_ratio';
+    const warnings = [];
 
     if (hasExplicitSplit) {
       splitSource = 'offer_stated';
@@ -75,7 +77,8 @@ class KsaOfferCalculator {
       housing = hasHousing ? round2(split.housing) : 0;
       transport = hasTransport ? round2(split.transport !== undefined ? split.transport : split.transportation) : 0;
       const other = round2(split.otherAllowances || split.other || 0);
-      if (amount !== undefined && amount !== null && toAmount(amount) > 0 && isGross) {
+      const grossStated = amount !== undefined && amount !== null && toAmount(amount) > 0 && isGross;
+      if (grossStated) {
         gross = round2(amount);
       } else if (amount !== undefined && amount !== null && toAmount(amount) > 0 && !hasBasic) {
         basic = round2(amount);
@@ -83,11 +86,30 @@ class KsaOfferCalculator {
       } else {
         gross = round2(basic + housing + transport + other);
       }
-      // Fill only the unspecified components from the standard ratio.
-      if (gross > 0) {
-        if (!hasBasic) basic = round2(gross * 0.65);
-        if (!hasHousing) housing = round2(gross * 0.25);
-        if (!hasTransport) transport = round2(gross * 0.10);
+      // With a stated gross, unspecified components share what is left of it after
+      // the stated ones, in the standard 65/25/10 proportions, so the parts never
+      // exceed gross. Without a stated gross, unspecified components stay 0.
+      const missing = !grossStated ? [] : [
+        !hasBasic && ['basic', 0.65],
+        !hasHousing && ['housing', 0.25],
+        !hasTransport && ['transport', 0.10]
+      ].filter(Boolean);
+      const remainder = round2(gross - basic - housing - transport - other);
+      if (remainder < 0) {
+        warnings.push({
+          code: 'COMPONENTS_EXCEED_GROSS',
+          message: `Stated components exceed the stated gross by ${round2(-remainder)} SAR. Confirm the figures with the employer.`
+        });
+      } else if (missing.length > 0) {
+        const weight = missing.reduce((sum, [, w]) => sum + w, 0);
+        const filled = { basic, housing, transport };
+        let left = remainder;
+        missing.forEach(([key, w], i) => {
+          // The last missing component takes the rest so rounding never drifts from gross.
+          filled[key] = i === missing.length - 1 ? round2(left) : round2(remainder * w / weight);
+          left -= filled[key];
+        });
+        ({ basic, housing, transport } = filled);
       }
     } else if (amount && typeof amount === 'object') {
       return KsaOfferCalculator.calculateSalaryStructure(amount.gross || amount.totalSalary || 0, {
@@ -107,7 +129,6 @@ class KsaOfferCalculator {
     }
 
     const basicShare = gross > 0 ? Number((basic / gross).toFixed(4)) : 0;
-    const warnings = [];
     if (gross > 0 && basicShare < 0.50) {
       warnings.push({
         code: 'PREDATORY_BASIC_COMPRESSION',
@@ -115,10 +136,11 @@ class KsaOfferCalculator {
         message: 'Basic salary is under 50% of total package, which depresses statutory End-of-Service benefits.'
       });
     }
-    if (gross > 0 && housing / gross < 0.25 && !options.companyHousing) {
+    // KSA market norm: housing allowance of 25% of BASIC (three months' basic per year).
+    if (gross > 0 && housing < round2(basic * 0.25) && !options.companyHousing) {
       warnings.push({
         code: 'SUBSTANDARD_HOUSING_ALLOWANCE',
-        message: 'Housing allowance is below standard 25% without company-provided accommodation.'
+        message: 'Housing allowance is below the market norm of 25% of basic salary (three months of basic per year) without company-provided accommodation.'
       });
     }
 
@@ -137,10 +159,10 @@ class KsaOfferCalculator {
    * Calculates GOSI social insurance contributions.
    * Contributory wage = Basic + Housing (capped at 45,000 SAR).
    * @param {number|Object} wage - Contributory wage or split object { basic, housing }
-   * @param {boolean} [isSaudiNational=true]
+   * @param {boolean} [isSaudiNational=false] Only true selects the Saudi-national rates
    * @returns {Object} GOSI assessment
    */
-  static calculateGosi(wage, isSaudiNational = true) {
+  static calculateGosi(wage, isSaudiNational = false) {
     let contributoryWage = 0;
     if (typeof wage === 'number') {
       contributoryWage = wage;
@@ -150,7 +172,7 @@ class KsaOfferCalculator {
 
     const cappedWage = Math.min(contributoryWage, GOSI_WAGE_CAP);
 
-    if (isSaudiNational) {
+    if (isSaudiNational === true) {
       // Saudi National:
       // Annuities: 9% employee, 9% employer
       // SANED: 0.75% employee, 0.75% employer
@@ -418,7 +440,18 @@ class KsaOfferCalculator {
       })
       : KsaOfferCalculator.calculateSalaryStructure(gross);
 
-    const isSaudi = offerTerms.isSaudiNational !== false;
+    // Not stated means non-Saudi (expatriate): assuming a Saudi national would
+    // deduct a 9.75% employee GOSI share an expatriate never pays.
+    const isSaudi = offerTerms.isSaudiNational === true;
+    const nationalityStated = typeof offerTerms.isSaudiNational === 'boolean';
+    const nationality = {
+      isSaudiNational: isSaudi,
+      source: nationalityStated ? 'stated' : 'assumed_default',
+      note: (isSaudi
+        ? 'GOSI calculated for a Saudi national (9.75% employee deduction).'
+        : 'GOSI calculated for a non-Saudi (expatriate) employee: no employee deduction.') +
+        (nationalityStated ? '' : ' Nationality was not stated; set isSaudiNational to true for a Saudi national.')
+    };
     const gosi = KsaOfferCalculator.calculateGosi(structure, isSaudi);
 
     const netMonthly = Number((structure.gross - gosi.employeeDeduction).toFixed(2));
@@ -458,6 +491,7 @@ class KsaOfferCalculator {
 
     return {
       structure,
+      nationality,
       gosi,
       eosb,
       eosbWageBasis,
@@ -470,7 +504,7 @@ class KsaOfferCalculator {
         issues: probationIssues
       },
       nonCompete,
-      summary: `Gross: ${structure.gross} SAR | Net: ${netMonthly} SAR | GOSI: ${gosi.employeeDeduction} SAR`
+      summary: `Gross: ${structure.gross} SAR | Net: ${netMonthly} SAR | GOSI: ${gosi.employeeDeduction} SAR (${isSaudi ? 'Saudi national' : 'non-Saudi'}${nationalityStated ? '' : ', assumed'})`
     };
   }
 }

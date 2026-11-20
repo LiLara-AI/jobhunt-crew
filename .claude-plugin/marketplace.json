@@ -11,7 +11,7 @@
       "name": "jobhunt-crew",
       "source": "./plugins/jobhunt-crew",
       "description": "Deterministic multi-agent job search and honest CV tailoring platform with verified claims and append-only ledger.",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "author": {
         "name": "JobHunt Crew Authors"
       },

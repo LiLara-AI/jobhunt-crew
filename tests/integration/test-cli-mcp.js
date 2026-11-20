@@ -130,7 +130,7 @@ suite.test('CLI claim verify correctly validates clean drafts and detects fabric
   const morganPath = path.join(__dirname, '..', 'fixtures', 'dossiers', 'morgan-vance.json');
 
   // 1. Clean draft -> exits 0
-  const cleanCmd = `node "${crewBin}" claim verify --dossier "${morganPath}" --draft "Reduced core event-processing p99 latency from 180ms to 42ms through Kafka topic repartitioning." --json`;
+  const cleanCmd = `node "${crewBin}" claim verify --dossier "${morganPath}" --draft "Reduced core event-processing p99 latency from 180ms to 42ms through Kafka topic repartitioning." --json --workspace "${tmpDir}"`;
   const cleanOut = execSync(cleanCmd, { encoding: 'utf8' });
   const cleanResult = JSON.parse(cleanOut);
   assert.equal(cleanResult.passed, true, 'Clean draft must pass claim verification');
@@ -139,7 +139,7 @@ suite.test('CLI claim verify correctly validates clean drafts and detects fabric
   // 2. Fabricated draft -> exits 1 with violations
   let failedAsExpected = false;
   try {
-    execSync(`node "${crewBin}" claim verify --dossier "${morganPath}" --draft "Reduced latency down to 10ms with Terraform." --json`, {
+    execSync(`node "${crewBin}" claim verify --dossier "${morganPath}" --draft "Reduced latency down to 10ms with Terraform." --json --workspace "${tmpDir}"`, {
       encoding: 'utf8',
       stdio: 'pipe'
     });

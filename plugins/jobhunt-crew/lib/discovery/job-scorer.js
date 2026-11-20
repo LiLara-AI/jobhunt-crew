@@ -18,9 +18,46 @@
  * @module lib/discovery/job-scorer
  */
 
-const { KsaCountryPack } = require('./ksa-pack');
+const { KsaCountryPack, ArabicQueryNormalizer } = require('./ksa-pack');
 
 const SHORT_ACRONYMS = new Set(['ai', 'ml', 'qa', 'vp', 'hr', 'ui', 'ux', 'pm']);
+// Rank/level words: present in titles of every profession, so they say nothing about fit.
+const RANK_WORDS = new Set([
+  'senior', 'junior', 'lead', 'head', 'chief', 'principal', 'staff', 'associate', 'assistant',
+  'manager', 'director', 'officer', 'specialist', 'executive', 'supervisor', 'coordinator',
+  'expert', 'intern', 'trainee', 'vice', 'president', 'deputy', 'general', 'group', 'team'
+]);
+
+// Unicode-aware: Arabic names keep their identity instead of collapsing to ''.
+function normCompanyName(s) {
+  return ArabicQueryNormalizer.normalize(String(s || '').toLowerCase()).replace(/[^\p{L}\p{N}]/gu, '');
+}
+
+// GCC gazetteer, one entry per country (KSA first): country names + major cities, EN and AR.
+// shortcut: a fixed city list, extend it (or move to lib/discovery/data) when a city is missed.
+const GCC_PLACES = [
+  /\b(?:saudi(?: arabia)?|ksa|riyadh|jeddah|jiddah|neom|al[- ]?khobar|khobar|dammam|dhahran|jubail|makkah|mecca|madinah|medina|tabuk|yanbu)\b|السعودية|الرياض|جدة|الدمام|الخبر|الظهران|مكة|المدينة المنورة/i,
+  /\b(?:united arab emirates|uae|dubai|abu dhabi|sharjah|ajman|al ain|ras al[- ]khaimah|fujairah)\b|الإمارات|الامارات|دبي|أبوظبي|أبو ظبي|ابوظبي|الشارقة/i,
+  /\b(?:qatar|doha|lusail)\b|قطر|الدوحة/i,
+  /\bkuwait\b|الكويت/i,
+  /\b(?:bahrain|manama)\b|البحرين|المنامة/i,
+  /\b(?:oman|muscat|salalah)\b|سلطنة عمان|مسقط/i
+];
+
+// Seniority ladder: 0 junior, 1 mid, 2 senior, 3 lead/staff/principal, 4 director and above.
+const SENIORITY_LEVELS = [
+  [4, /\b(?:director|head|vp|vice[- ]president|chief)\b/i],
+  [3, /\b(?:principal|staff|lead)\b/i],
+  [2, /\b(?:senior|sr)\b/i],
+  [1, /\bmid(?:dle)?\b/i],
+  [0, /\b(?:junior|jr|intern|graduate|entry|trainee)\b/i]
+];
+
+/** Ladder level named in a title or seniority string, or null when it names none. */
+function seniorityLevel(text) {
+  const hit = SENIORITY_LEVELS.find(([, re]) => re.test(String(text || '')));
+  return hit ? hit[0] : null;
+}
 
 function escapeRegExp(s) {
   return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -52,7 +89,7 @@ class JobScorer {
    * Scores a discovered job vacancy against candidate preferences and verified skills.
    *
    * @param {object} job - Vacancy record { title, company, location, url, postedAgeDays, deadlineAt, description, rawPayload }
-   * @param {object} [preferences={}] - Candidate preferences { targetTitles, targetCities, companyWatchlist, excludedCompanies, candidateStatus }
+   * @param {object} [preferences={}] - Candidate preferences { targetTitles, targetCities, targetCountries, targetSeniority, companyWatchlist, excludedCompanies, candidateStatus }
    * @param {Array<string>} [candidateSkills=[]] - Verified candidate skills / tool keywords
    * @returns {object} Evaluation summary
    */
@@ -78,14 +115,15 @@ class JobScorer {
     // Target preferences extraction
     const targetTitles = Array.isArray(preferences.targetTitles) ? preferences.targetTitles : [];
     const targetCities = Array.isArray(preferences.targetCities) ? preferences.targetCities : [];
+    const targetCountries = Array.isArray(preferences.targetCountries) ? preferences.targetCountries : [];
     const watchlist = Array.isArray(preferences.companyWatchlist) ? preferences.companyWatchlist : [];
     const excludedCompanies = Array.isArray(preferences.excludedCompanies) ? preferences.excludedCompanies : [];
     const candidateStatus = preferences.candidateStatus || 'Transferable Iqama';
 
     // 0. Hard Knockout Checks
-    const normCompany = company.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const isExcludedCompany = excludedCompanies.some(ec =>
-      normCompany === String(ec).toLowerCase().replace(/[^a-z0-9]/g, '')
+    const normCompany = normCompanyName(company);
+    const isExcludedCompany = normCompany !== '' && excludedCompanies.some(ec =>
+      normCompany === normCompanyName(ec)
     );
 
     if (isExcludedCompany) {
@@ -104,7 +142,7 @@ class JobScorer {
     }
 
     // Regional Compliance & Saudization Knockout
-    const compliance = KsaCountryPack.evaluateCompliance(textToScan, candidateStatus);
+    const compliance = KsaCountryPack.evaluateCompliance(textToScan, candidateStatus, { title });
     if (!compliance.eligible) {
       return {
         score: 0.0,
@@ -132,10 +170,27 @@ class JobScorer {
       } else if (partialMatch) {
         dTitle = 4.0;
       } else {
-        // Token overlap
-        const words = titleLower.split(/[^\p{L}\p{N}+#.]+/u).filter(w => w.length > 3 || SHORT_ACRONYMS.has(w));
-        const matchesWord = targetTitles.some(t => words.some(w => t.toLowerCase().includes(w)));
-        dTitle = matchesWord ? 3.0 : 1.5;
+        // Token overlap on role-identifying words only. Rank words are shared
+        // by every profession: "Senior Manager - Accounts" is not a match for
+        // "Customer Experience Manager" just because both say "manager".
+        const tokens = s => s.toLowerCase().split(/[^\p{L}\p{N}+#.]+/u)
+          .filter(w => (w.length > 3 || SHORT_ACRONYMS.has(w)) && !RANK_WORDS.has(w));
+        const jobWords = new Set(tokens(title));
+        let best = 0;
+        let anyDistinctive = false;
+        for (const t of targetTitles) {
+          const want = tokens(t);
+          if (want.length === 0) continue;
+          anyDistinctive = true;
+          best = Math.max(best, want.filter(w => jobWords.has(w)).length / want.length);
+        }
+        if (!anyDistinctive) {
+          // Targets made only of rank words ("Senior Manager"): legacy overlap.
+          const words = titleLower.split(/[^\p{L}\p{N}+#.]+/u).filter(w => w.length > 3 || SHORT_ACRONYMS.has(w));
+          dTitle = targetTitles.some(t => words.some(w => t.toLowerCase().includes(w))) ? 3.0 : 1.5;
+        } else {
+          dTitle = best === 1 ? 4.0 : best >= 0.5 ? 3.0 : best > 0 ? 2.5 : 1.5;
+        }
       }
     } else {
       dTitle = 4.0;
@@ -144,11 +199,17 @@ class JobScorer {
     // D2: Location & Work Mode Match (Weight: 20%, Scale: 0.0 - 5.0)
     let dLocation = 3.0;
     const locLower = location.toLowerCase();
-    if (targetCities.length > 0) {
-      const cityMatched = targetCities.some(c => locLower.includes(c.toLowerCase()));
+    if (targetCities.length > 0 || targetCountries.length > 0) {
+      const cityMatched = targetCities.some(c => locLower.includes(String(c).toLowerCase()));
+      // Partial match: the job is in a GCC country the candidate targets, named
+      // directly, via one of its cities, or through a region-wide target ("GCC").
+      const targets = [...targetCities, ...targetCountries].map(String);
+      const gccWide = targets.some(t => /\b(?:gcc|gulf|middle east|mena)\b/i.test(t));
+      let targetPlaces = GCC_PLACES.filter(re => gccWide || targets.some(t => re.test(t)));
+      if (targetPlaces.length === 0) targetPlaces = [GCC_PLACES[0]]; // nothing recognised: legacy KSA default
       if (cityMatched) {
         dLocation = 5.0;
-      } else if (/saudi arabia|ksa|riyadh|jeddah|neom|khobar|dammam|remote/i.test(locLower)) {
+      } else if (/remote/i.test(locLower) || targetPlaces.some(re => re.test(location))) {
         dLocation = 3.5;
       } else if (locLower.length === 0) {
         dLocation = 3.0;
@@ -171,12 +232,22 @@ class JobScorer {
       if (matchedCount >= 5) dTech = 5.0;
       else if (matchedCount >= 3) dTech = 4.5;
       else if (matchedCount >= 1) dTech = 3.5;
-      else dTech = 2.0;
+      // No JD captured (snapshot jobs carry title + location only): zero hits is not evidence of a mismatch.
+      else dTech = (job.description || job.rawPayload) ? 2.0 : 3.5;
     }
 
     // D4: Seniority Level Fit (Weight: 15%, Scale: 0.0 - 5.0)
+    // Relative to the candidate's own level when preferences name one (explicit
+    // targetSeniority, else the levels in their target titles): closer is better.
     let dSeniority = 4.0;
-    if (/(?:principal|staff|lead|director|head|vp|chief)/i.test(title)) {
+    let candidateLevels = [seniorityLevel(preferences.targetSeniority)];
+    if (candidateLevels[0] === null) candidateLevels = targetTitles.map(seniorityLevel);
+    candidateLevels = candidateLevels.filter(l => l !== null);
+    if (candidateLevels.length > 0) {
+      const jobLevel = seniorityLevel(title) ?? 1;
+      const gap = Math.min(...candidateLevels.map(l => Math.abs(l - jobLevel)));
+      dSeniority = [5.0, 4.0, 2.5][gap] ?? 1.0;
+    } else if (/(?:principal|staff|lead|director|head|vp|chief)/i.test(title)) {
       dSeniority = 5.0;
     } else if (/(?:senior|sr\.?)/i.test(title)) {
       dSeniority = 4.0;
@@ -188,7 +259,8 @@ class JobScorer {
     let dWatchlist = 2.5;
     const reg = KsaCountryPack.getWatchlistRegistry();
     const enterprise = reg.findByCompanyName(company);
-    const inCustomWatchlist = watchlist.some(w =>
+    // ''.includes / includes('') is always true: a job with no company must not hit the watchlist.
+    const inCustomWatchlist = company.length > 0 && watchlist.some(w =>
       company.toLowerCase().includes(w.toLowerCase()) || w.toLowerCase().includes(company.toLowerCase())
     );
 
@@ -243,6 +315,12 @@ class JobScorer {
     // Closing-Soon Priority Escalation Boost (+0.5, clamped at 5.0)
     if (closingSoon) {
       composite = Math.min(5.0, composite + 0.5);
+    }
+
+    // A role whose title shares nothing role-specific with the candidate's
+    // targets is never shortlisted on location/employer/seniority alone.
+    if (targetTitles.length > 0 && dTitle < 2.5) {
+      composite = Math.min(composite, 2.9);
     }
 
     const finalScore = Number(composite.toFixed(1));
@@ -340,6 +418,7 @@ const TriageScorer = {
 
 module.exports = {
   skillMatchesText,
+  seniorityLevel,
   SHORT_ACRONYMS,
   JobScorer,
   TriageScorer,

@@ -1,7 +1,7 @@
 {
   "name": "jobhunt-crew",
   "displayName": "JobHunt Crew",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Local multi-agent job search crew with claim-verified CV tailoring, an append-only event ledger, and human-only submission.",
   "author": {
     "name": "JobHunt Crew Authors"

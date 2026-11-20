@@ -349,7 +349,8 @@ for (const p of cliProbes) {
   runProbe(`CLI: ${p.label}`, () => {
     let exitCode = 0;
     try {
-      execSync(p.cmd, { cwd: ROOT_DIR, stdio: 'pipe' });
+      // These probes use the repo root as the workspace (relative fixture dossier), which the CLI refuses without the opt-in.
+      execSync(p.cmd, { cwd: ROOT_DIR, stdio: 'pipe', env: { ...process.env, CREW_ALLOW_PLUGIN_WORKSPACE: '1' } });
     } catch (err) {
       exitCode = err.status;
     }

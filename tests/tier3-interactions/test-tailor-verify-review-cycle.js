@@ -24,8 +24,9 @@ suite.test('Happy path: Role selection leads to claim verification, blind review
   };
 
   // 2. Scribe drafts clean content anchored in verified claims
-  const draftContent = 'Principal Platform Architect at Apex Cloud Technologies. Reduced core event-processing p99 latency from 180ms to 42ms through Kafka topic repartitioning and zero-copy deserialization in Go. Architected a multi-region Kubernetes platform hosting 120+ microservices processing 4.5 billion daily events across 3 availability zones.';
-  const claimsUsed = ['CLM-001', 'CLM-002'];
+  // Four verified claims: a two-sentence draft is too thin to earn a 4.0 from the blind review.
+  const draftContent = 'Principal Platform Architect at Apex Cloud Technologies. Reduced core event-processing p99 latency from 180ms to 42ms through Kafka topic repartitioning and zero-copy deserialization in Go. Architected a multi-region Kubernetes platform hosting 120+ microservices processing 4.5 billion daily events across 3 availability zones. Cut AWS cloud compute and storage expenditure by 34% annually ($480,000 saved) through autoscaling spot fleet orchestration and ARM64 migration. Mentored 8 senior and staff engineers across 2 platform squads, leading quarterly architecture review boards and RFC design processes.';
+  const claimsUsed = ['CLM-001', 'CLM-002', 'CLM-003', 'CLM-004'];
 
   // 3. ClaimVerifier validates draft against real dossier
   const verifyResult = ClaimVerifier.verifyDraft(morganDossier, draftContent, { claimIds: claimsUsed });

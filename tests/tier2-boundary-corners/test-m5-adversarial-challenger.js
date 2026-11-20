@@ -378,7 +378,8 @@ suite.test('3.3 OutreachGenerator: persona differentiation and content structure
 
   // Peer
   const peerDraft = OutreachGenerator.generateOutreach({ persona: 'PEER', jobRecord: job, dossier });
-  assert.ok(peerDraft.message.includes('fellow platform engineer'), 'Peer draft should emphasize shared technical interest');
+  assert.ok(peerDraft.message.includes('the work your team does at Tamara'), 'Peer draft should show interest in the team');
+  assert.ok(!peerDraft.message.includes('platform engineer'), 'Peer draft must not assume a profession the dossier does not state');
   assert.strictEqual(peerDraft.persona, 'PEER');
 });
 

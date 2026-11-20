@@ -8,9 +8,11 @@
  * @module lib/cli/shared
  */
 
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
-const VERSION = '0.2.3';
+const VERSION = '0.2.4';
 
 function parseArgs(rawArgs) {
   const flags = {};
@@ -52,14 +54,49 @@ function parseArgs(rawArgs) {
   return { positional, flags };
 }
 
-function resolveWorkspace(flags) {
-  // CREW_WORKSPACE lets host MCP configs pin the workspace regardless of the launch cwd.
+// The folder holding this package (bin/, lib/, package.json): never a job-hunt workspace.
+const PLUGIN_ROOT = path.resolve(__dirname, '..', '..');
+
+function samePath(a, b) {
+  const real = (p) => { try { return fs.realpathSync(p); } catch (_) { return path.resolve(p); } };
+  const [x, y] = [real(a), real(b)];
+  return process.platform === 'win32' ? x.toLowerCase() === y.toLowerCase() : x === y;
+}
+
+/**
+ * Hosts launch the CLI and MCP server from an arbitrary cwd (often the plugin
+ * folder or the home directory), where .crew/ must never be created.
+ * Returns the refusal message for such a folder, or null when it is usable.
+ * CREW_ALLOW_PLUGIN_WORKSPACE=1 lets this repo's own tests and scripts use the plugin root.
+ */
+function workspaceRefusal(dir) {
+  const isPlugin = samePath(dir, PLUGIN_ROOT) && process.env.CREW_ALLOW_PLUGIN_WORKSPACE !== '1';
+  const isHome = samePath(dir, os.homedir());
+  if (!isPlugin && !isHome) return null;
+  return `WORKSPACE_REFUSED: "${dir}" is ${isPlugin ? 'the JobHunt Crew plugin folder' : 'your home directory'}, not a job-hunt workspace. ` +
+    'Pass --workspace <folder> or set CREW_WORKSPACE to the folder that holds (or should hold) your job hunt.';
+}
+
+// An MCP server must still start in a refused folder: McpServer re-checks and
+// returns the refusal from every tool call instead of dying before the host connects.
+function isMcpLaunch() {
+  const main = require.main ? path.basename(require.main.filename || '') : '';
+  return main === 'crew-mcp.js' || (main === 'crew.js' && process.argv[2] === 'mcp');
+}
+
+function resolveWorkspace(flags = {}, { guard = !isMcpLaunch() } = {}) {
+  // Precedence: flag, then CREW_WORKSPACE (host MCP configs pin it regardless of launch cwd), then cwd.
   const ws = flags.workspace || flags.w || process.env.CREW_WORKSPACE;
-  return typeof ws === 'string' && ws ? path.resolve(ws) : process.cwd();
+  const dir = typeof ws === 'string' && ws ? path.resolve(ws) : process.cwd();
+  const refusal = guard ? workspaceRefusal(dir) : null;
+  if (refusal) throw new Error(refusal);
+  return dir;
 }
 
 module.exports = {
   VERSION,
   parseArgs,
-  resolveWorkspace
+  resolveWorkspace,
+  workspaceRefusal,
+  PLUGIN_ROOT
 };
