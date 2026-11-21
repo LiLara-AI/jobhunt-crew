@@ -40,3 +40,10 @@ test('recording a FOLLOW_UP_SENT the reducer would ignore fails instead of repor
   assert.throws(() => GuardrailEngine.validateFollowUpSent({ job_id: 'job_1', day: 7 }, snapshot), /tracked application/);
   assert.throws(() => GuardrailEngine.validateFollowUpSent({ jobId: 'job_01', day: 7 }, snapshot), /tracked application/);
 });
+
+test('a jobId of "__proto__" neither passes the guardrail nor pollutes Object.prototype', () => {
+  const { GuardrailEngine } = require('../../lib/guardrails/engine');
+  assert.throws(() => GuardrailEngine.validateFollowUpSent({ jobId: '__proto__', day: 7 }, reduceEvents(base)), /tracked application/);
+  reduceEvents([...base, { event: 'FOLLOW_UP_SENT', payload: { jobId: '__proto__', day: 7 } }]);
+  assert.strictEqual({}.followUps, undefined);
+});

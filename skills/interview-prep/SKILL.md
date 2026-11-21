@@ -1,6 +1,6 @@
 ---
 name: interview-prep
-description: "Interactive mock interview simulator and STAR plus R story bank companion tied to verified candidate claims with cultural and company signal analysis."
+description: "Runs mock interviews one question at a time and builds a STAR plus R story bank tied to verified candidate claims. Use when the user has an interview coming up, wants mock interview practice, or wants to build or rehearse behavioral stories."
 ---
 
 # Interview Prep — One Question at a Time
@@ -46,7 +46,9 @@ Run the simulation in the archetype the user picks (default order below):
    Give the single highest-value fix, then offer a retry of the same question.
 4. **Generate the pack.** Action `pack` on `crew_interview_story` compiles the
    interview pack (`generateInterviewPack`): mapped stories, anticipated
-   questions, and reverse-interview questions for the candidate to ask.
+   questions, and reverse-interview questions for the candidate to ask. Its
+   two question lists are a short general set that is the same for every job:
+   add the questions this role and its requirements call for yourself.
 5. **Close with gaps.** Name requirement areas with no confirmed story and route
    the user to the update skill to confirm the missing claims honestly.
 

@@ -1,6 +1,6 @@
 ---
 name: contacto
-description: "Drafts concise under 300 character outreach notes and follow-up messages for recruiters, hiring managers, and peers anchored in verified dossier claims."
+description: "Drafts short outreach and follow-up messages grounded in one verified claim, with the 300-character LinkedIn limit counted. Use when the user wants a LinkedIn connection note, an InMail, a message to a recruiter, hiring manager, or peer, or a follow-up after applying."
 ---
 
 
@@ -25,7 +25,8 @@ follow-up, or a peer introduction message.
    role or team and pass its id as `claim_id`. If no verified claim fits, write
    a claim-free note instead of stretching one: pass `claim_id` `"none"`,
    because with no `claim_id` the tool picks the first verified claim itself.
-3. **Generate the draft.** Use MCP `crew_outreach`, backed by
+3. **Generate the draft.** Use MCP `crew_outreach` with the recipient type as
+   `persona` (left out, the tool writes the `RECRUITER` note), backed by
    `OutreachGenerator.generateOutreach` in `lib/crew/outreach.js` (with
    `getCharCount` and `fitWithinLimit` enforcing the limit). The `RECRUITER`
    draft says the user recently applied: reword that sentence if they have not.

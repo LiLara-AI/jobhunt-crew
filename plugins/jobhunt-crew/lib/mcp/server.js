@@ -71,7 +71,7 @@ function loadSavedStories(workspace, bank) {
 }
 
 const SERVER_NAME = 'jobhunt-crew-mcp';
-const SERVER_VERSION = '0.2.6';
+const SERVER_VERSION = '0.2.7';
 const PROTOCOL_VERSION = '2024-11-05';
 // Versions this server can speak; echo the client's if listed, else fall back.
 const SUPPORTED_PROTOCOL_VERSIONS = ['2024-11-05', '2025-03-26', '2025-06-18'];
@@ -495,6 +495,7 @@ class McpServer {
           non_compete_months: { type: 'number', description: 'Non-compete duration in months' },
           non_compete_scope: { type: 'string', description: 'Non-compete geographic scope text' },
           transport: { type: 'number', description: 'Monthly transport allowance (evaluate)' },
+          regular_allowances: { type: 'number', description: 'Total of any other fixed monthly allowances, counted in the EOSB wage (evaluate)' },
           qiwa_notice_date: { type: 'string', description: 'Qiwa service-transfer notice date (evaluate)' },
           title: { type: 'string', description: 'Job title for localized-profession screening (evaluate)' }
         },
@@ -1090,7 +1091,8 @@ class McpServer {
   async toolBackup(args) {
     return createBackup({
       workspaceDir: this.workspace,
-      outFile: args.out_file ? path.resolve(this.workspace, args.out_file) : undefined
+      // The archive holds the profile, so a tool call may only write it inside the workspace.
+      outFile: args.out_file ? this.resolveInWorkspace(args.out_file, 'Backup file') : undefined
     });
   }
 
@@ -1137,7 +1139,10 @@ class McpServer {
     const screeningAnswers = ApplyPackGenerator.generateScreeningAnswers(dossier, job);
     const preFillPlan = ApplyPackGenerator.buildPreFillPlan(job, dossier);
     const snapshot = this.readSnapshot();
-    const recorded = ApplyPackGenerator.checksFromApplication(job.id && snapshot.applications ? snapshot.applications[job.id] : null);
+    const recorded = ApplyPackGenerator.checksFromApplication(
+      job.id && snapshot.applications ? snapshot.applications[job.id] : null,
+      job.id && snapshot.jobs ? snapshot.jobs[job.id] : null
+    );
     const blockers = ApplyPackGenerator.submissionBlockers(recorded);
     // The letter saved in the pack must itself pass the verifier, whatever was verified earlier.
     const coverLetterText = typeof args.cover_letter_text === 'string' && args.cover_letter_text.trim() ? args.cover_letter_text : '';
@@ -1151,8 +1156,7 @@ class McpServer {
       jobUrl: job.url,
       matchScore: typeof job.score === 'number' ? job.score : undefined,
       claimsUsed: Array.isArray(args.claims_used) ? args.claims_used : [],
-      // The recorded verdict and score win; a passed-in result only adds its detail.
-      reviewVerdict: recorded.reviewVerdict ? { ...(args.review_verdict || {}), ...recorded.reviewVerdict } : args.review_verdict,
+      reviewVerdict: this.packReviewVerdict(args.review_verdict, recorded.reviewVerdict),
       verification: recorded.verification,
       coverLetterText,
       blockers,
@@ -1173,14 +1177,36 @@ class McpServer {
     };
   }
 
-  async toolReadResume(args) {
-    if (!args.file) throw new Error('Parameter "file" is required');
-    const file = path.resolve(this.workspace, String(args.file));
-    // Workspace files only: this tool must not become a way to read arbitrary local files.
+  /**
+   * The review shown in a pack. The recorded verdict and score win and a
+   * passed-in result only adds its detail; a verdict that is not recorded is
+   * labelled so, because the submit gate will not accept it.
+   */
+  packReviewVerdict(passedIn, recorded) {
+    const detail = passedIn && typeof passedIn === 'object' ? passedIn : null;
+    if (!recorded) return detail && detail.verdict ? { ...detail, verdict: `${detail.verdict} (not recorded)` } : detail;
+    return {
+      ...(detail || {}),
+      verdict: recorded.verdict,
+      ...(recorded.overallScore != null ? { overallScore: recorded.overallScore } : {})
+    };
+  }
+
+  /** Resolves a tool path argument and refuses anything outside the workspace folder. */
+  resolveInWorkspace(value, label) {
+    const file = path.resolve(this.workspace, String(value));
     const rel = path.relative(this.workspace, file);
     if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      throw new Error('Resume file must be inside the workspace folder. Copy it there, or paste the resume text instead.');
+      throw new Error(`${label} must be inside the workspace folder.`);
     }
+    return file;
+  }
+
+  async toolReadResume(args) {
+    if (!args.file) throw new Error('Parameter "file" is required');
+    // Workspace files only: this tool must not become a way to read arbitrary local files.
+    const file = this.resolveInWorkspace(args.file, 'Resume file');
+    const rel = path.relative(this.workspace, file);
     if (!['.docx', '.txt', '.md'].includes(path.extname(file).toLowerCase())) {
       throw new Error('Unsupported resume file type. Use .docx, .txt or .md, or paste the resume text instead.');
     }
@@ -1188,7 +1214,7 @@ class McpServer {
     // A link or junction inside the workspace must not lead outside it.
     const realRel = path.relative(fs.realpathSync(this.workspace), fs.realpathSync(file));
     if (realRel.startsWith('..') || path.isAbsolute(realRel)) {
-      throw new Error('Resume file must be inside the workspace folder. Copy it there, or paste the resume text instead.');
+      throw new Error('Resume file must be inside the workspace folder.');
     }
     if (fs.statSync(file).size > 5 * 1024 * 1024) {
       throw new Error('Resume file is larger than 5 MB. Paste the resume text instead.');
@@ -1298,6 +1324,7 @@ class McpServer {
           basic: args.basic,
           housing: args.housing,
           transport: args.transport,
+          regularAllowances: args.regular_allowances,
           isSaudiNational: typeof args.is_saudi_national === 'boolean' ? isSaudi : undefined,
           tenureYears: args.tenure_years,
           separationType: args.separation_type,

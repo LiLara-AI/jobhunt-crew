@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { EventLedger } = require('./ledger');
+const { EventLedger, hasReservedId } = require('./ledger');
 const { normalizeJobUrl } = require('../guardrails/dedup');
 const TERMINAL_STATUSES = new Set(['closed', 'submitted']);
 
@@ -42,7 +42,8 @@ function reduceEvents(events, initialState = null) {
     const timestamp = e.timestamp || new Date().toISOString();
     const actor = e.actor || 'system';
 
-    switch (eventType) {
+    // An old ledger may hold an event with a reserved id: replay it as a no-op.
+    switch (hasReservedId(p) ? '' : eventType) {
       case 'JOB_DISCOVERED': {
         const jobId = p.id || p.jobId;
         const cUrl = canonicalizeUrl(p.url);

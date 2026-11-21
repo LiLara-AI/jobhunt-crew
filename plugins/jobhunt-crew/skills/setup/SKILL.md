@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Interactive single-question onboarding wizard that parses your resume, suggests target job titles, and initializes your local job search workspace."
+description: "Onboards a new JobHunt Crew workspace one question at a time: reads the resume, drafts claims to confirm, and writes the local profile and search settings. Use to set up or onboard JobHunt Crew, and before any other JobHunt Crew skill when the folder has no dossier.json yet."
 ---
 
 
@@ -37,11 +37,13 @@ or when no `dossier.json` / `.crew/` exists in the workspace yet.
 6. **Authorization and notice.** Ask work authorization status and notice period
    as plain facts, with no recommendation attached.
 7. **Knockouts.** Ask which sectors, companies, or conditions are hard exclusions.
-   Job scoring applies excluded companies, the seniority floor, and excluded
-   sectors (a posting is dropped only when its title or company name contains
-   the sector word, so store short plain terms such as `tobacco`). A sector
-   that shows only in the description, and any other condition, is not
-   scored: tell the user you apply those yourself when you triage.
+   Job scoring drops excluded companies and excluded sectors (a posting is
+   dropped only when its title or company name contains the sector word, so
+   store short plain terms such as `tobacco`). The seniority floor is not a
+   cut-off: scoring treats it as the level the user is aiming for and ranks
+   closer roles higher, so record the level they actually want. A sector that
+   shows only in the description, and any other condition, is not scored:
+   tell the user you apply those yourself when you triage.
 8. **Boards and watchlist.** Confirm which boards to sweep and which employers to
    watch even when they post rarely. Tell the user what these do: a watchlist
    employer scores higher, and the boards are your list for attended-browser
@@ -57,7 +59,8 @@ or when no `dossier.json` / `.crew/` exists in the workspace yet.
    Write every claim with `"status": "CONFIRM"`. Never omit `status`: a claim
    without it counts as verified. Set `candidate.salaryFloor.disclosurePolicy`
    to exactly `leave_blank_if_optional`, `mandatory_only`, or
-   `negotiable_placeholder`; any other value prints the salary floor in packs.
+   `negotiable_placeholder`; any other value states the floor outright as the
+   salary answer in packs.
    Read each claim back to the user. For the ones they confirm, call
    `crew_confirm_claims` (or `crew claim confirm --id <ids>`). Unconfirmed claims
    fail draft verification, so do not skip this, and never

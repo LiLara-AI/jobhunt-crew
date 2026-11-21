@@ -1,6 +1,6 @@
 ---
 name: apply-multi-vacancy
-description: "Evaluates several openings at one employer, recommends apply or skip per role, and builds one convergent CV with per-role cover letters."
+description: "Handles several openings at one employer: recommends apply or skip per role, then builds one shared CV with a cover letter per role. Use instead of honest-cv when the user wants to apply to two or more roles at the same company, or asks which of a company's postings to pursue."
 ---
 
 
@@ -27,12 +27,15 @@ letters. No tool does the apply-or-skip triage for you: you do it in step 2.
    table to the user and let them override before drafting anything.
 3. **Build the convergent CV.** One headline and one core claim set must serve
    every APPLY role. Choose bridging claims (verified `[C-xx]` only) that are
-   relevant to all chosen roles, then draft the CV and run `crew_blind_review`
-   once for this shared CV (the honest-cv skill, `skills/honest-cv/SKILL.md` in
-   the plugin root, has the drafting stages). Results are stored per job, so
-   for every APPLY role run `crew_verify_draft` on the CV with that role's
-   `job_id` and record the verdict with `crew_review_record`. A role without
-   both shows NOT RUN in its pack and its submit is refused. A posting that is
+   relevant to all chosen roles, then draft the one shared CV (the honest-cv
+   skill, `skills/honest-cv/SKILL.md` in the plugin root, has the drafting
+   stages). Checks are stored per job and the review is scored against one
+   role's requirements, so repeat them for every APPLY role: run
+   `crew_verify_draft` on the CV with that role's `job_id`, run
+   `crew_blind_review` with that role's title and requirements, and record
+   that role's own verdict with `crew_review_record`. Never record one role's
+   verdict for another. A role without both shows NOT RUN in its pack and its
+   submit is refused. A posting that is
    not tracked yet is added first with `crew job add --url <u> --title <t>
    --company <c>`; read its id from `crew_get_snapshot`.
 4. **Per-role cover letters.** Each APPLY role gets its own letter with its own
@@ -74,8 +77,6 @@ node "${CLAUDE_PLUGIN_ROOT}/cli/crew.js" tool <crew_tool_name> --workspace "<job
 
 ## Tool reference
 
-- MCP: `crew_get_snapshot`, `crew_get_job`, `crew_triage_job`,
-  `crew_blind_review`, `crew_review_record`, `crew_verify_draft`,
-  `crew_apply_pack`
-- CLI: `crew job add`, `crew job triage`, `crew job inspect`,
-  `crew claim verify`
+- MCP: `crew_get_snapshot`, `crew_get_job`, `crew_blind_review`,
+  `crew_review_record`, `crew_verify_draft`, `crew_apply_pack`
+- CLI: `crew job add`, `crew job inspect`
