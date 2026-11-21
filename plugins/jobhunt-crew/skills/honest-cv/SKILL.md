@@ -53,9 +53,13 @@ this posting, or pastes a job description and wants application materials.
    documents and finish on a pass. Any violation (unknown metric, wrong
    employer, missing claim) must be fixed or explicitly confirmed by the
    candidate. No pack is built on a failed verification.
-7. **Stage 7 apply pack.** The tool does not check stages 5 and 6 for you, so
-   build the pack only after both passed. Call MCP `crew_apply_pack` with
-   `job_id` and `claims_used` (the ids from stage 2), backed by
+7. **Stage 7 apply pack.** Build the pack only after stages 5 and 6 passed.
+   Call MCP `crew_apply_pack` with `job_id`, `claims_used` (the ids from stage
+   2), and the verified letter as `cover_letter_text`. The tool refuses when
+   the job's latest recorded verification failed or the letter itself fails
+   the verifier. Its result has `status` and `blockers`: the pack is ready for
+   the human only when `status` is `ready-to-submit` and `blockers` is empty;
+   `blocked` means a check is not recorded yet. Backed by
    `ApplyPackGenerator` in `lib/honest-cv/apply-pack.js`
    (`generateScreeningAnswers`, `buildPreFillPlan`, `compileApplyPackMarkdown`,
    `writeApplyPack`). Output lands in `applications/` as `apply-pack.md` with the
@@ -63,9 +67,11 @@ this posting, or pastes a job description and wants application materials.
    disclosure policy, and the pre-fill plan whose safety gate is validated by
    `validateSafetyGate`. The pack renders `CV_<slug>.docx` and `.pdf` from the
    dossier claims in `claims_used` (every verified claim when the list is
-   empty), not from your draft text, and keeps any file already in the pack
-   folder. Read `artifactNotes` in the result: it names the cover letter file
-   to save there, then rebuild the pack.
+   empty), not from your draft text. `cover_letter_text` is saved there as
+   `CoverLetter_<slug>.docx`. Files already in the pack folder are kept, not
+   replaced: to save a revised letter, delete the old file first, otherwise
+   the pack comes back `blocked`. Read `artifactNotes` in the result for
+   anything that was kept or not generated.
 8. **Attended pre-fill.** In the browser, fill fields per the pre-fill plan and
    stop. Status stays `ready-to-submit`. Record progress with
    `crew_record_event`; the human reviews, attaches files, and submits. An

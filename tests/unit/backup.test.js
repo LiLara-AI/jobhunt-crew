@@ -139,4 +139,31 @@ describe('operational/backup createBackup/restoreBackup (temp workspaces only)',
       fs.rmSync(work, { recursive: true, force: true });
     }
   });
+  test('the profile and search settings at the workspace root are backed up and restored', async () => {
+    const work = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-backup-profile-'));
+    const out = path.join(work, 'archive.json');
+    try {
+      const ledger = new EventLedger({ workspaceDir: work });
+      await ledger.appendEvent({ event: 'JOB_DISCOVERED', actor: 'agent:recon', payload: { id: 'job_1', title: 'Engineer', company: 'Acme' } });
+      fs.writeFileSync(path.join(work, 'dossier.json'), '{"claims":[{"id":"C-01"}]}', 'utf8');
+      fs.writeFileSync(path.join(work, 'search-config.json'), '{"targetTitles":["Engineer"]}', 'utf8');
+      assert.deepStrictEqual(createBackup({ workspaceDir: work, outFile: out }).workspaceFiles, ['dossier.json', 'search-config.json']);
+
+      fs.writeFileSync(path.join(work, 'dossier.json'), '{"claims":[]}', 'utf8');
+      fs.rmSync(path.join(work, 'search-config.json'));
+      const res = await restoreBackup({ file: out, workspaceDir: work });
+      assert.deepStrictEqual(res.restoredWorkspaceFiles, ['dossier.json', 'search-config.json']);
+      assert.strictEqual(fs.readFileSync(path.join(work, 'dossier.json'), 'utf8'), '{"claims":[{"id":"C-01"}]}');
+      assert.strictEqual(fs.readFileSync(path.join(work, 'search-config.json'), 'utf8'), '{"targetTitles":["Engineer"]}');
+
+      // A tampered profile is refused before anything is written.
+      const archive = JSON.parse(fs.readFileSync(out, 'utf8'));
+      archive.workspaceFiles['dossier.json'] = '{"claims":[{"id":"C-99"}]}';
+      fs.writeFileSync(out, JSON.stringify(archive), 'utf8');
+      await assert.rejects(restoreBackup({ file: out, workspaceDir: work }), /checksum mismatch for dossier.json/);
+    } finally {
+      fs.rmSync(work, { recursive: true, force: true });
+    }
+  });
 });
+

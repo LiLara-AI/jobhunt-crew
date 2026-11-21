@@ -37,9 +37,11 @@ legal advice; say so once, plainly.
    may not exceed 180 days (checked inside `evaluateOffer`). Remind the user to
    confirm the contract is the Qiwa-registered version and that title, salary,
    and start date match the offer letter exactly.
-6. **Non-compete.** Action `noncompete` (`validateNonCompete`) checks Article 83
-   limits: at most 24 months and a defined geographic scope where the employer
-   actually operates. Flag worldwide or open-ended wording.
+6. **Non-compete.** Only when the offer has such a clause. Action `noncompete`
+   (`validateNonCompete`) checks two Article 83 limits: at most 24 months, and
+   a stated geographic scope that is not worldwide, global, or unlimited. It
+   cannot tell where the employer actually operates: compare the scope with
+   that yourself, and flag open-ended wording.
 7. **Negotiation summary.** Use action `evaluate` for the combined report, then
    list asks in priority order (raise basic share before gross, narrow the
    non-compete, clarify probation terms) with short, collaborative phrasing the

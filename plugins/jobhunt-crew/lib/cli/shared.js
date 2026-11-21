@@ -12,7 +12,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const VERSION = '0.2.5';
+const VERSION = '0.2.6';
 
 function parseArgs(rawArgs) {
   const flags = {};

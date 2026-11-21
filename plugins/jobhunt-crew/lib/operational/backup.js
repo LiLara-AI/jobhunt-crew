@@ -15,6 +15,11 @@ const crypto = require('crypto');
 const { EventLedger } = require('../ledger/ledger');
 const { replayLedger } = require('../ledger/reducer');
 
+// The profile and search settings live at the workspace root, outside .crew.
+// Fixed names only: restore never takes a workspace path from the archive.
+const WORKSPACE_FILES = ['dossier.json', 'search-config.json'];
+const sha256 = content => crypto.createHash('sha256').update(content, 'utf8').digest('hex');
+
 function toPosixPath(relativePath) {
   return relativePath.split(path.sep).join('/');
 }
@@ -114,15 +119,26 @@ function createBackup(options = {}) {
   collectCrewEntries(crewDir, crewDir, files, checksums, directories);
   directories.sort(compareNames);
 
+  const workspaceFiles = {};
+  const workspaceChecksums = {};
+  for (const name of WORKSPACE_FILES) {
+    const filePath = path.join(workspace, name);
+    if (!fs.existsSync(filePath) || !fs.lstatSync(filePath).isFile()) continue;
+    workspaceFiles[name] = fs.readFileSync(filePath, 'utf8');
+    workspaceChecksums[name] = sha256(workspaceFiles[name]);
+  }
+
   const backupData = {
     _metadata: {
       version: '0.1.0',
       createdAt: new Date().toISOString(),
       fileCount: Object.keys(files).length,
       directories,
-      checksums
+      checksums,
+      workspaceChecksums
     },
-    files
+    files,
+    workspaceFiles
   };
 
   fs.writeFileSync(outFile, JSON.stringify(backupData, null, 2) + '\n', 'utf8');
@@ -130,7 +146,8 @@ function createBackup(options = {}) {
   return {
     backupPath: outFile,
     fileCount: Object.keys(files).length,
-    checksums
+    checksums,
+    workspaceFiles: Object.keys(workspaceFiles)
   };
 }
 
@@ -194,6 +211,19 @@ async function restoreBackup(options = {}) {
     }
   }
 
+  // Profile files at the workspace root (absent in older backups).
+  const workspacePlan = [];
+  for (const name of WORKSPACE_FILES) {
+    const content = backup.workspaceFiles ? backup.workspaceFiles[name] : undefined;
+    if (content === undefined) continue;
+    if (typeof content !== 'string') throw new Error(`Invalid backup entry content: ${name}`);
+    const expectedHash = (backup._metadata.workspaceChecksums || {})[name];
+    if (expectedHash !== sha256(content)) throw new Error(`Backup archive corrupted: checksum mismatch for ${name}`);
+    const targetPath = path.join(workspace, name);
+    if (fs.existsSync(targetPath) && fs.lstatSync(targetPath).isSymbolicLink()) throw traversalError(name);
+    workspacePlan.push({ name, content, targetPath });
+  }
+
   // Restore directories, then files (each file's parent is ensured too, so
   // nested entries restore even when directories metadata is absent).
   for (const { targetPath } of directoryPlan) {
@@ -205,6 +235,7 @@ async function restoreBackup(options = {}) {
     fs.writeFileSync(targetPath, content, 'utf8');
     restoredFiles.push(name);
   }
+  for (const { content, targetPath } of workspacePlan) fs.writeFileSync(targetPath, content, 'utf8');
 
   // Verify restored ledger chain
   const ledgerPath = path.join(crewDir, 'ledger.jsonl');
@@ -224,6 +255,7 @@ async function restoreBackup(options = {}) {
 
   return {
     restoredFiles,
+    restoredWorkspaceFiles: workspacePlan.map(entry => entry.name),
     ledgerVerified,
     eventCount,
     status: 'RESTORE_VERIFIED'

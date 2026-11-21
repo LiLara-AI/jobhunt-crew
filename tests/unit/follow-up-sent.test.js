@@ -31,3 +31,12 @@ test('FOLLOW_UP_SENT with an unknown day or job changes nothing', () => {
   assert.strictEqual(actionOn(odd, '2026-01-09T00:00:00.000Z'), 'DUE_CADENCE_7');
   assert.strictEqual(reduceEvents(odd).applications.job_missing, undefined);
 });
+
+test('recording a FOLLOW_UP_SENT the reducer would ignore fails instead of reporting success', () => {
+  const { GuardrailEngine } = require('../../lib/guardrails/engine');
+  const snapshot = reduceEvents(base);
+  assert.strictEqual(GuardrailEngine.validateFollowUpSent({ jobId: 'job_1', day: '14' }, snapshot), true);
+  assert.throws(() => GuardrailEngine.validateFollowUpSent({ jobId: 'job_1', day: '7th' }, snapshot), /day 7 or 14/);
+  assert.throws(() => GuardrailEngine.validateFollowUpSent({ job_id: 'job_1', day: 7 }, snapshot), /tracked application/);
+  assert.throws(() => GuardrailEngine.validateFollowUpSent({ jobId: 'job_01', day: 7 }, snapshot), /tracked application/);
+});
