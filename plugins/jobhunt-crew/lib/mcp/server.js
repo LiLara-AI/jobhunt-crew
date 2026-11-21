@@ -71,7 +71,7 @@ function loadSavedStories(workspace, bank) {
 }
 
 const SERVER_NAME = 'jobhunt-crew-mcp';
-const SERVER_VERSION = '0.2.9';
+const SERVER_VERSION = '0.2.10';
 const PROTOCOL_VERSION = '2024-11-05';
 // Versions this server can speak; echo the client's if listed, else fall back.
 const SUPPORTED_PROTOCOL_VERSIONS = ['2024-11-05', '2025-03-26', '2025-06-18'];
@@ -495,7 +495,6 @@ class McpServer {
           non_compete_months: { type: 'number', description: 'Non-compete duration in months' },
           non_compete_scope: { type: 'string', description: 'Non-compete geographic scope text' },
           transport: { type: 'number', description: 'Monthly transport allowance (evaluate)' },
-          regular_allowances: { type: 'number', description: 'Total of any other fixed monthly allowances, counted in the EOSB wage (evaluate)' },
           qiwa_notice_date: { type: 'string', description: 'Qiwa service-transfer notice date (evaluate)' },
           title: { type: 'string', description: 'Job title for localized-profession screening (evaluate)' }
         },
@@ -1324,7 +1323,6 @@ class McpServer {
           basic: args.basic,
           housing: args.housing,
           transport: args.transport,
-          regularAllowances: args.regular_allowances,
           isSaudiNational: typeof args.is_saudi_national === 'boolean' ? isSaudi : undefined,
           tenureYears: args.tenure_years,
           separationType: args.separation_type,
