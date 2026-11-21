@@ -237,12 +237,6 @@ async function restoreBackup(options = {}) {
     fs.writeFileSync(targetPath, content, 'utf8');
     restoredFiles.push(name);
   }
-  for (const { content, targetPath, replaces } of workspacePlan) {
-    // Keep the profile being replaced: a restore must not be the way it is lost.
-    if (replaces) fs.copyFileSync(targetPath, `${targetPath}.pre-restore`);
-    fs.writeFileSync(targetPath, content, 'utf8');
-  }
-
   // Verify restored ledger chain
   const ledgerPath = path.join(crewDir, 'ledger.jsonl');
   let ledgerVerified = false;
@@ -257,6 +251,14 @@ async function restoreBackup(options = {}) {
     eventCount = check.count;
     // Replay snapshot
     await replayLedger({ workspaceDir: workspace, rebuild: true });
+  }
+
+  // Profile files last, once the restored ledger has passed its chain check.
+  for (const { content, targetPath, replaces } of workspacePlan) {
+    // Keep the profile being replaced, and never overwrite an earlier safety copy.
+    const safetyCopy = `${targetPath}.pre-restore`;
+    if (replaces && !fs.existsSync(safetyCopy)) fs.copyFileSync(targetPath, safetyCopy);
+    fs.writeFileSync(targetPath, content, 'utf8');
   }
 
   return {
