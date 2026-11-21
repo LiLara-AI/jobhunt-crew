@@ -1,6 +1,6 @@
 {
   "name": "jobhunt-crew",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Deterministic multi-agent job hunt automation and honest CV tailoring platform with verified claims and append-only ledger",
   "author": "JobHunt Crew Authors",
   "license": "MIT",

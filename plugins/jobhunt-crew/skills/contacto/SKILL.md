@@ -26,7 +26,9 @@ follow-up, or a peer introduction message.
    stretching one.
 3. **Generate the draft.** Use MCP `crew_outreach`, backed by
    `OutreachGenerator.generateOutreach` in `lib/crew/outreach.js` (with
-   `getCharCount` and `fitWithinLimit` enforcing the limit). For InMail or email
+   `getCharCount` and `fitWithinLimit` enforcing the limit). The `RECRUITER`
+   draft says the user recently applied: reword that sentence if they have not.
+   For InMail or email
    follow-ups, the 300-character cap does not apply, but keep it to a short
    paragraph plus one clear ask.
 4. **For follow-ups, check cadence first.** If the message follows a submitted
@@ -34,7 +36,9 @@ follow-up, or a peer introduction message.
    day-14 touchpoint instead of nagging early.
 5. **Present 2 variants** (direct and warmer), each with its character count and
    the claim id used. Let the user pick or edit; record a sent follow-up only
-   when the user confirms they sent it, via `crew_record_event`.
+   when the user confirms they sent it, via `crew_record_event` with type
+   `FOLLOW_UP_SENT` and payload `{ "jobId": "<id>", "day": 7 }` (or `14`), so
+   `crew_cadence` stops reporting that touchpoint as due.
 
 ## What never goes in a note
 
@@ -66,4 +70,4 @@ node "${CLAUDE_PLUGIN_ROOT}/cli/crew.js" tool <crew_tool_name> --workspace "<job
 ## Tool reference
 
 - MCP: `crew_outreach`, `crew_cadence`, `crew_get_job`, `crew_record_event`
-- CLI: `crew alerts`, `crew job inspect`
+- CLI: `crew alerts closing-soon`, `crew job inspect`
