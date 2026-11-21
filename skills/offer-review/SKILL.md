@@ -15,17 +15,23 @@ legal advice; say so once, plainly.
 1. **Capture the terms.** Monthly gross or basic, allowances, probation length,
    contract type, non-compete terms, notice period, and Saudi-national status
    (GOSI differs). Ask for missing items one at a time; never assume a number.
-2. **Salary structure.** Action `salary` (`calculateSalaryStructure`) splits the
-   package into the standard 65% basic / 25% housing / 10% transport and flags a
-   compressed basic, which quietly reduces end-of-service value.
+2. **Salary structure.** If the offer states its own basic, housing, or
+   transport, pass them with `total_salary` to action `evaluate` and read
+   `structure`: that is the only path that checks the real split and flags a
+   compressed basic (under 50% of gross). Action `salary`
+   (`calculateSalaryStructure`) takes one figure and always returns the
+   standard 65% basic / 25% housing / 10% transport split, so use it only when
+   the offer gives a single gross or basic figure, and label the result as an
+   assumed split, not the offer's terms.
 3. **GOSI.** Action `gosi` (`calculateGosi`) computes contributions on basic plus
    housing, capped at the statutory wage cap: 21.5% total for Saudi nationals
    (9.75% employee side), 2% employer-only hazards cover for non-Saudis. Show
    the resulting net take-home.
 4. **End-of-service (EOSB).** Action `eosb` (`calculateEosb`) applies Articles
    84/85: half a month per year for the first five years, a full month after,
-   with resignation reductions before ten years. Show values at 2, 5, and 10
-   years so the basic-salary effect is visible.
+   with resignation reductions before ten years. Pass `monthly_wage` as basic
+   + housing + transport (the actual wage `evaluate` uses) so the figures match
+   the combined report in step 7. Show values at 2, 5, and 10 years.
 5. **Probation and Qiwa.** Probation beyond 90 days needs written agreement and
    may not exceed 180 days (checked inside `evaluateOffer`). Remind the user to
    confirm the contract is the Qiwa-registered version and that title, salary,

@@ -247,6 +247,17 @@ function reduceEvents(events, initialState = null) {
         break;
       }
 
+      // The human sent the day-7 or day-14 follow-up; the cadence engine reads followUps.
+      case 'FOLLOW_UP_SENT': {
+        const app = state.applications[p.jobId];
+        const day = Number(p.day);
+        if (app && (day === 7 || day === 14)) {
+          app.followUps = { ...(app.followUps || {}), [`day${day}`]: true };
+          app.updatedAt = timestamp;
+        }
+        break;
+      }
+
       case 'OUTREACH_DRAFTED': {
         const jobId = p.jobId;
         state.outreach[jobId] = {

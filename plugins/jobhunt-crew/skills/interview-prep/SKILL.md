@@ -73,4 +73,4 @@ node "${CLAUDE_PLUGIN_ROOT}/cli/crew.js" tool <crew_tool_name> --workspace "<job
 ## Tool reference
 
 - MCP: `crew_interview_story`, `crew_get_job`, `crew_get_snapshot`
-- CLI: `crew job inspect`, `crew claim`
+- CLI: `crew job inspect`, `crew claim verify`

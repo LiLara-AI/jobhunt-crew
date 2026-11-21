@@ -71,7 +71,7 @@ function loadSavedStories(workspace, bank) {
 }
 
 const SERVER_NAME = 'jobhunt-crew-mcp';
-const SERVER_VERSION = '0.2.4';
+const SERVER_VERSION = '0.2.5';
 const PROTOCOL_VERSION = '2024-11-05';
 // Versions this server can speak; echo the client's if listed, else fall back.
 const SUPPORTED_PROTOCOL_VERSIONS = ['2024-11-05', '2025-03-26', '2025-06-18'];
@@ -474,7 +474,7 @@ class McpServer {
           basic: { type: 'number', description: 'Monthly basic salary when gross is unknown' },
           housing: { type: 'number', description: 'Monthly housing allowance (gosi wage object)' },
           is_saudi_national: { type: 'boolean', description: 'GOSI nationality branch: true for a Saudi national; omitted or false means non-Saudi (expatriate)', default: false },
-          monthly_wage: { type: 'number', description: 'Basic plus housing wage for EOSB' },
+          monthly_wage: { type: 'number', description: 'Monthly actual wage for EOSB: basic + housing + transport + regular allowances (eosb)' },
           tenure_years: { type: 'number', description: 'Service years for EOSB (eosb, evaluate)' },
           separation_type: { type: 'string', enum: ['TERMINATION', 'CONTRACT_EXPIRY', 'RESIGNATION'], description: 'EOSB separation type (eosb, evaluate)' },
           probation_days: { type: 'integer', description: 'Probation length in days (evaluate)' },

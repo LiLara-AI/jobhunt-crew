@@ -1,6 +1,6 @@
 ---
 name: honest-cv
-description: "End-to-end claim-verified CV and cover letter tailoring pipeline with blind review panel and attended browser form pre-filling stopping before submit."
+description: "Tailors a claim-verified CV (resume) and cover letter for a job posting, then builds the apply pack and pre-fills the form, stopping before submit. Use when the user asks to apply to a job, tailor a CV or resume, write a cover letter, or pastes a job description."
 ---
 
 
@@ -20,6 +20,11 @@ this posting, or pastes a job description and wants application materials.
 1. **Intake and positioning.** Read the posting (pasted text, URL, or a job in the
    snapshot via MCP `crew_get_job`). Extract must-have requirements, seniority,
    and location terms. State the honest positioning angle in one sentence.
+   The job must be tracked, because later results are recorded against its id.
+   If it is not in the snapshot, add it with `crew job add --url <posting URL>
+   --title <title> --company <company>` (ask for the URL if only text was
+   pasted), then read its id from `crew_get_snapshot` with filter
+   `{ "company": "<company>" }`. Pass that `job_id` in stages 5 to 7.
 2. **Claim grounding.** From `dossier.json`, select only claims whose employer,
    dates, and metrics support this role. List the chosen `[C-xx]` ids before
    drafting so gaps are visible early.
@@ -36,18 +41,31 @@ this posting, or pastes a job description and wants application materials.
    scrubbed of identity and claim ids first (`CandidateScrubber.scrubAll`), then
    scored from Recruiter and Hiring Manager perspectives. `REQUEST_CHANGES`
    sends the draft back to stage 3 with the panel's top recommendations.
+   The panel itself records nothing: record the final verdict with MCP
+   `crew_review_record` (`job_id`, `verdict`, `overall_score`). An unrecorded
+   review shows as NOT RUN in the pack and the human's submit is refused.
 6. **Deterministic verification (Inquisitor).** Run MCP `crew_verify_draft`
-   (CLI `crew claim`) against the dossier. This calls
-   `ClaimVerifier.verifyDraft` in `lib/honest-cv/verify-claims.js`. Any violation
-   (unknown metric, wrong employer, missing claim) must be fixed or explicitly
-   confirmed by the candidate. No pack is built on a failed verification.
-7. **Stage 7 apply pack.** Build the pack with MCP `crew_apply_pack`, backed by
+   with `draft_path` and `job_id` on the CV and on the cover letter. This calls
+   `ClaimVerifier.verifyDraft` in `lib/honest-cv/verify-claims.js`. The result
+   is recorded only when `job_id` is passed; the CLI `crew claim verify` checks
+   a draft but never records, so without MCP use `crew tool crew_verify_draft`.
+   Only the latest result per job is kept, so after any fix re-run both
+   documents and finish on a pass. Any violation (unknown metric, wrong
+   employer, missing claim) must be fixed or explicitly confirmed by the
+   candidate. No pack is built on a failed verification.
+7. **Stage 7 apply pack.** The tool does not check stages 5 and 6 for you, so
+   build the pack only after both passed. Call MCP `crew_apply_pack` with
+   `job_id` and `claims_used` (the ids from stage 2), backed by
    `ApplyPackGenerator` in `lib/honest-cv/apply-pack.js`
    (`generateScreeningAnswers`, `buildPreFillPlan`, `compileApplyPackMarkdown`,
    `writeApplyPack`). Output lands in `applications/` as `apply-pack.md` with the
    claim manifest, review verdict, screening answers that respect the salary
    disclosure policy, and the pre-fill plan whose safety gate is validated by
-   `validateSafetyGate`.
+   `validateSafetyGate`. The pack renders `CV_<slug>.docx` and `.pdf` from the
+   dossier claims in `claims_used` (every verified claim when the list is
+   empty), not from your draft text, and keeps any file already in the pack
+   folder. Read `artifactNotes` in the result: it names the cover letter file
+   to save there, then rebuild the pack.
 8. **Attended pre-fill.** In the browser, fill fields per the pre-fill plan and
    stop. Status stays `ready-to-submit`. Record progress with
    `crew_record_event`; the human reviews, attaches files, and submits. An
@@ -84,6 +102,8 @@ node "${CLAUDE_PLUGIN_ROOT}/cli/crew.js" tool <crew_tool_name> --workspace "<job
 
 ## Tool reference
 
-- MCP: `crew_get_job`, `crew_editorial_rules`, `crew_blind_review`,
-  `crew_verify_draft`, `crew_apply_pack`, `crew_record_event`
-- CLI: `crew claim`, `crew review`, `crew job inspect`, `crew ledger replay`
+- MCP: `crew_get_job`, `crew_get_snapshot`, `crew_editorial_rules`,
+  `crew_blind_review`, `crew_review_record`, `crew_verify_draft`,
+  `crew_apply_pack`, `crew_record_event`
+- CLI: `crew job add`, `crew job inspect`, `crew claim verify`,
+  `crew review record`, `crew ledger replay`

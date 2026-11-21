@@ -13,8 +13,7 @@ asks which of a company's postings they should pursue.
 Enterprise applicant systems often keep one candidate profile per company.
 Sending divergent CVs to sibling requisitions creates contradictions recruiters
 can see. This skill produces one convergent narrative plus role-specific cover
-letters, backed by `MultiVacancyStrategist.evaluateCompanyVacancies` in
-`lib/honest-cv/multi-vacancy.js`.
+letters. No tool does the apply-or-skip triage for you: you do it in step 2.
 
 ## Steps
 
@@ -27,14 +26,23 @@ letters, backed by `MultiVacancyStrategist.evaluateCompanyVacancies` in
    table to the user and let them override before drafting anything.
 3. **Build the convergent CV.** One headline and one core claim set must serve
    every APPLY role. Choose bridging claims (verified `[C-xx]` only) that are
-   relevant to all chosen roles, then run the honest-cv drafting, blind review,
-   and verification stages once for this shared CV.
+   relevant to all chosen roles, then draft the CV and run `crew_blind_review`
+   once for this shared CV (the honest-cv skill, `skills/honest-cv/SKILL.md` in
+   the plugin root, has the drafting stages). Results are stored per job, so
+   for every APPLY role run `crew_verify_draft` on the CV with that role's
+   `job_id` and record the verdict with `crew_review_record`. A role without
+   both shows NOT RUN in its pack and its submit is refused. A posting that is
+   not tracked yet is added first with `crew job add --url <u> --title <t>
+   --company <c>`; read its id from `crew_get_snapshot`.
 4. **Per-role cover letters.** Each APPLY role gets its own letter with its own
    focus area and salutation, while facts and metrics stay identical to the
-   convergent CV. Verify each letter with `crew_verify_draft`.
-5. **Package per role.** Run `crew_apply_pack` once per APPLY role, all pointing
-   at the same convergent CV artifact. Record the shared-CV relationship in each
-   pack so the human sees the linkage before submitting anything.
+   convergent CV. Verify each letter with `crew_verify_draft` and that role's
+   `job_id`; only the latest result per job is kept, so finish each role on a
+   pass.
+5. **Package per role.** Run `crew_apply_pack` once per APPLY role with that
+   role's `job_id` and the same `claims_used` list, so every pack renders the
+   same CV content. The tool has no field that links packs: tell the user which
+   packs share the CV before they submit anything.
 6. **Order the submissions.** Recommend a submission order (strongest fit first)
    and remind the user that each final submit is theirs, one role at a time.
 
@@ -63,5 +71,7 @@ node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job
 ## Tool reference
 
 - MCP: `crew_get_snapshot`, `crew_get_job`, `crew_triage_job`,
-  `crew_blind_review`, `crew_verify_draft`, `crew_apply_pack`
-- CLI: `crew job triage`, `crew job inspect`, `crew claim`
+  `crew_blind_review`, `crew_review_record`, `crew_verify_draft`,
+  `crew_apply_pack`
+- CLI: `crew job add`, `crew job triage`, `crew job inspect`,
+  `crew claim verify`
