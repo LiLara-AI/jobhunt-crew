@@ -252,8 +252,32 @@ const NO_VISA_SPONSORSHIP = [
   /لا\s+يتوفر\s+نقل\s+كفالة/
 ];
 
+// Work authorization reaches us as intake ids ("saudi_national"), intake labels
+// ("Transferable Iqama (KSA Resident)") or the legacy Title-Case strings.
+const WORK_AUTH_ALIASES = {
+  saudinational: 'Saudi National',
+  saudicitizen: 'Saudi National',
+  saudi: 'Saudi National',
+  gccnational: 'GCC National',
+  gcccitizen: 'GCC National',
+  gcc: 'GCC National',
+  transferableiqama: 'Transferable Iqama',
+  transferableiqamaksaresident: 'Transferable Iqama',
+  iqama: 'Transferable Iqama',
+  visasponsorship: 'Requires Visa Sponsorship',
+  requiresvisasponsorship: 'Requires Visa Sponsorship',
+  needsvisasponsorship: 'Requires Visa Sponsorship'
+};
+
+/** Maps any known spelling to the canonical Title-Case status; unknown values pass through. */
+function normalizeWorkAuthorization(status) {
+  const key = String(status || '').toLowerCase().replace(/[^a-z]/g, '');
+  return Object.hasOwn(WORK_AUTH_ALIASES, key) ? WORK_AUTH_ALIASES[key] : status;
+}
+
 class IqamaTransferEngine {
   static evaluate(jobText, candidateStatus) {
+    candidateStatus = normalizeWorkAuthorization(candidateStatus);
     const text = jobText || '';
     const requiresIqama = IQAMA_TRANSFER_PATTERNS.some(p => p.test(text));
     const visaAvailable = VISA_SPONSORSHIP_AVAILABLE.some(p => p.test(text));
@@ -656,11 +680,16 @@ class KsaCountryPack {
    */
   static evaluateCompliance(jobText, candidateStatus = 'Transferable Iqama', metadata = {}) {
     const text = jobText || '';
+    candidateStatus = normalizeWorkAuthorization(candidateStatus);
 
     // 1. Saudization detection
+    // A localized profession is the role itself: when the caller supplies the job
+    // title (metadata.title) match only that, so a JD that merely mentions an
+    // "HR Manager" is not knocked out. Callers passing one bare text keep the old scan.
+    const professionText = typeof metadata.title === 'string' ? metadata.title : text;
     const isSaudizationRestricted = SAUDIZATION_PATTERNS.some(p => p.test(text)) ||
       LOCALIZED_PROFESSIONS.some(p =>
-        p.enPatterns.some(ep => ep.test(text)) || p.arPatterns.some(ap => ap.test(text))
+        p.enPatterns.some(ep => ep.test(professionText)) || p.arPatterns.some(ap => ap.test(professionText))
       );
 
     // 2. Work-auth check
@@ -734,6 +763,7 @@ module.exports = {
   IqamaTransferEngine,
   ArabicCvPolicy,
   KSA_WATCHLIST,
+  normalizeWorkAuthorization,
   evaluateKsaCompliance,
   shouldGenerateArabicCv
 };

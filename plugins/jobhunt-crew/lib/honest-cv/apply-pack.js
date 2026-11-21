@@ -13,32 +13,54 @@
 
 const fs = require('fs');
 const path = require('path');
+const { DocGenerator } = require('./doc-generator');
+
+// Dossier each pre-fill plan was built from, so writeApplyPack can render the CV
+// for callers that pass the plan but not the dossier (MCP server, CLI).
+const PLAN_DOSSIERS = new WeakMap();
+
+const bareId = id => String(id).replace(/^\[|\]$/g, '').trim();
 
 class ApplyPackGenerator {
   /**
    * Generates screening answers respecting the candidate's salary policy.
+   * Every statement comes from the dossier; nothing is assumed about the candidate's field.
    */
   static generateScreeningAnswers(dossier, jobRecord = {}) {
     const candidate = dossier.candidate || {};
     const floor = candidate.salaryFloor || { currency: 'SAR', minimumBase: 0, disclosurePolicy: 'mandatory_only' };
     const currency = floor.currency || 'SAR';
-    const minBase = floor.minimumBase ? floor.minimumBase.toLocaleString() : '0';
+    const minBase = floor.minimumBase ? floor.minimumBase.toLocaleString() : '';
     const policy = floor.disclosurePolicy || 'mandatory_only';
 
     let salaryAnswer = '';
-    if (policy === 'mandatory_only' || policy === 'leave_blank_if_optional') {
-      salaryAnswer = `Leave blank if optional. If mandatory numeric field, enter ${minBase} (${currency}).`;
-    } else if (policy === 'negotiable_placeholder') {
+    if (policy === 'negotiable_placeholder') {
       salaryAnswer = 'Negotiable / Open to competitive market compensation.';
+    } else if (!minBase) {
+      salaryAnswer = 'Leave blank if optional. No salary floor is recorded in the dossier; decide the figure yourself if the field is mandatory.';
+    } else if (policy === 'mandatory_only' || policy === 'leave_blank_if_optional') {
+      salaryAnswer = `Leave blank if optional. If mandatory numeric field, enter ${minBase} (${currency}).`;
     } else {
       salaryAnswer = `${minBase} ${currency} / month base minimum.`;
     }
 
+    const claim = (Array.isArray(dossier.claims) ? dossier.claims : [])
+      .find(c => c && c.text && (!c.status || c.status === 'VERIFIED'));
+    const sentence = s => (/[.!?]$/.test(String(s).trim()) ? String(s).trim() : `${String(s).trim()}.`);
+    const motivation = [
+      jobRecord.title
+        ? `I am interested in the ${jobRecord.title} role at ${jobRecord.company || 'your organization'}.`
+        : `I am interested in joining ${jobRecord.company || 'the team'}.`,
+      candidate.currentTitle ? `My current role: ${candidate.currentTitle}.` : '',
+      candidate.summary ? sentence(candidate.summary) : '',
+      claim ? `One result I delivered: ${sentence(claim.text)}` : ''
+    ].filter(Boolean).join(' ');
+
     return {
-      workAuthorization: candidate.workAuthorization || 'Authorized to work',
-      noticePeriod: `${candidate.noticePeriodDays || 30} Days`,
+      workAuthorization: candidate.workAuthorization || '',
+      noticePeriod: Number.isFinite(candidate.noticePeriodDays) ? `${candidate.noticePeriodDays} Days` : '',
       salaryExpectations: salaryAnswer,
-      customMotivation: `I am interested in joining ${jobRecord.company || 'the team'} to leverage my proven background in distributed systems and architecture.`
+      customMotivation: motivation
     };
   }
 
@@ -49,19 +71,30 @@ class ApplyPackGenerator {
   static buildPreFillPlan(jobRecord, dossier) {
     const candidate = dossier.candidate || {};
     const answers = ApplyPackGenerator.generateScreeningAnswers(dossier, jobRecord);
+    const floor = candidate.salaryFloor || {};
+    const skippedFields = [];
+    const fieldMappings = [
+      { selector: 'input[name*="name"], input[id*="name"], input[data-automation-id*="legalName"]', value: candidate.name, type: 'text' },
+      { selector: 'input[name*="email"], input[type="email"], input[data-automation-id*="email"]', value: candidate.email, type: 'text' },
+      { selector: 'input[name*="phone"], input[type="tel"], input[data-automation-id*="phone"]', value: candidate.phone, type: 'text' },
+      { selector: 'select[name*="auth"], select[name*="visa"], select[data-automation-id*="workAuth"]', value: answers.workAuthorization, type: 'select' },
+      { selector: 'input[name*="notice"], select[name*="notice"]', value: answers.noticePeriod, type: 'text' }
+    ].filter(m => m.value); // never type "undefined" or a guess into a form
+
+    // Salary inputs are numeric: only a bare number is ever typed, and only when the
+    // policy says to always disclose. Otherwise the field is left for the human.
+    if (floor.disclosurePolicy === 'always_disclose' && floor.minimumBase > 0) {
+      fieldMappings.push({ selector: 'input[name*="salary"], input[name*="comp"], input[data-automation-id*="salary"]', value: String(floor.minimumBase), type: 'text' });
+    } else {
+      skippedFields.push({ field: 'salary', reason: `Not pre-filled (disclosure policy: ${floor.disclosurePolicy || 'mandatory_only'}). ${answers.salaryExpectations}` });
+    }
 
     const plan = {
       jobId: jobRecord.id || 'job_target',
       company: jobRecord.company || 'Enterprise',
       targetUrl: jobRecord.url || 'https://careers.example.org',
-      fieldMappings: [
-        { selector: 'input[name*="name"], input[id*="name"], input[data-automation-id*="legalName"]', value: candidate.name, type: 'text' },
-        { selector: 'input[name*="email"], input[type="email"], input[data-automation-id*="email"]', value: candidate.email, type: 'text' },
-        { selector: 'input[name*="phone"], input[type="tel"], input[data-automation-id*="phone"]', value: candidate.phone, type: 'text' },
-        { selector: 'select[name*="auth"], select[name*="visa"], select[data-automation-id*="workAuth"]', value: answers.workAuthorization, type: 'select' },
-        { selector: 'input[name*="notice"], select[name*="notice"]', value: answers.noticePeriod, type: 'text' },
-        { selector: 'input[name*="salary"], input[name*="comp"], input[data-automation-id*="salary"]', value: answers.salaryExpectations, type: 'text' }
-      ],
+      fieldMappings,
+      skippedFields,
       safetyGate: {
         prohibitedSelectors: ['button[type="submit"]', 'input[type="submit"]', 'button:contains("Submit")', 'button:contains("Confirm")'],
         status: 'ready-to-submit',
@@ -70,7 +103,56 @@ class ApplyPackGenerator {
     };
 
     ApplyPackGenerator.validateSafetyGate(plan);
+    PLAN_DOSSIERS.set(plan, dossier);
     return plan;
+  }
+
+  /**
+   * Renders the CV files the pack lists into the application folder and reports
+   * what is really on disk. Existing files are kept, never overwritten.
+   * @returns {{ artifacts: Object<string,string>, artifactNotes: string[] }}
+   */
+  static renderArtifacts(appDir, slug, dossier, packData = {}) {
+    const artifacts = {};
+    const artifactNotes = [];
+    const used = (packData.claimsUsed || []).map(bareId);
+    const cv = dossier && dossier.candidate && dossier.candidate.name
+      ? { ...dossier, claims: (dossier.claims || []).filter(c => c && (!used.length || used.includes(bareId(c.id)))) }
+      : null;
+    const renderers = packData.artifacts ? {} : {
+      cvDocx: () => DocGenerator.generateCvDocx(cv),
+      cvPdf: () => DocGenerator.generateCvPdf(cv, { quiet: true })
+    };
+    const names = packData.artifacts || {
+      cvDocx: `CV_${slug}.docx`,
+      cvPdf: `CV_${slug}.pdf`,
+      coverLetterDocx: `CoverLetter_${slug}.docx`
+    };
+
+    for (const [key, name] of Object.entries(names)) {
+      if (!name) continue;
+      const file = path.resolve(appDir, String(name));
+      if (fs.existsSync(file)) {
+        artifacts[key] = name;
+        if (renderers[key]) artifactNotes.push(`\`${name}\` already existed and was kept as is. Delete it and rebuild this pack to regenerate it from the dossier.`);
+      } else if (renderers[key] && cv) {
+        try {
+          fs.writeFileSync(file, renderers[key]());
+          artifacts[key] = name;
+        } catch (err) {
+          artifactNotes.push(`\`${name}\` was NOT generated: ${err.message}`);
+        }
+      } else if (packData.artifacts) {
+        artifactNotes.push(`\`${name}\` was listed for this pack but does not exist on disk.`);
+      }
+    }
+    if (!packData.artifacts && !cv) {
+      artifactNotes.push('No CV was generated: no dossier with a candidate name was available. Create `dossier.json` (setup skill), then rebuild this pack.');
+    }
+    if (!packData.artifacts && !artifacts.coverLetterDocx) {
+      artifactNotes.push(`No cover letter file yet. Draft it, save it in this folder as \`${names.coverLetterDocx}\` (\`DocGenerator.generateCoverLetterDocx\`), then rebuild this pack.`);
+    }
+    return { artifacts, artifactNotes };
   }
 
   /**
@@ -149,15 +231,15 @@ class ApplyPackGenerator {
     lines.push('');
 
     // Section 2: Tailored Artifacts
+    // Only files that exist on disk are listed (see renderArtifacts); never a phantom name.
     lines.push('## 2. Tailored Application Artifacts');
-    if (artifacts) {
-      if (artifacts.cvDocx) lines.push(`- **CV (DOCX)**: \`${artifacts.cvDocx}\``);
-      if (artifacts.cvPdf) lines.push(`- **CV (PDF)**: \`${artifacts.cvPdf}\``);
-      if (artifacts.coverLetterDocx) lines.push(`- **Cover Letter (DOCX)**: \`${artifacts.coverLetterDocx}\``);
-    } else {
-      lines.push(`- **CV (DOCX)**: \`CV_${company.replace(/\s+/g, '_')}_${roleTitle.replace(/\s+/g, '_')}.docx\``);
-      lines.push(`- **CV (PDF)**: \`CV_${company.replace(/\s+/g, '_')}_${roleTitle.replace(/\s+/g, '_')}.pdf\``);
-      lines.push(`- **Cover Letter (DOCX)**: \`CoverLetter_${company.replace(/\s+/g, '_')}_${roleTitle.replace(/\s+/g, '_')}.docx\``);
+    const listed = artifacts || {};
+    if (listed.cvDocx) lines.push(`- **CV (DOCX)**: \`${listed.cvDocx}\``);
+    if (listed.cvPdf) lines.push(`- **CV (PDF)**: \`${listed.cvPdf}\``);
+    if (listed.coverLetterDocx) lines.push(`- **Cover Letter (DOCX)**: \`${listed.coverLetterDocx}\``);
+    for (const note of packData.artifactNotes || []) lines.push(`- ⚠ ${note}`);
+    if (!Object.keys(listed).length && !(packData.artifactNotes || []).length) {
+      lines.push('- No documents have been generated for this pack yet.');
     }
     lines.push('');
 
@@ -192,8 +274,9 @@ class ApplyPackGenerator {
     // Section 5: Screening Answers
     lines.push('## 5. Pre-Drafted Screening Answers');
     if (screeningAnswers) {
-      lines.push(`- **Work Authorization**: ${screeningAnswers.workAuthorization}`);
-      lines.push(`- **Notice Period**: ${screeningAnswers.noticePeriod}`);
+      const orMissing = v => v || 'not recorded in the dossier (answer this yourself)';
+      lines.push(`- **Work Authorization**: ${orMissing(screeningAnswers.workAuthorization)}`);
+      lines.push(`- **Notice Period**: ${orMissing(screeningAnswers.noticePeriod)}`);
       lines.push(`- **Salary Expectations**: ${screeningAnswers.salaryExpectations}`);
       if (screeningAnswers.customMotivation) {
         lines.push(`- **Motivation / Why this role?**: ${screeningAnswers.customMotivation}`);
@@ -213,6 +296,9 @@ class ApplyPackGenerator {
         lines.push(`- \`${m.selector}\` $\\to$ "${m.value}"`);
       }
     }
+    for (const s of (preFillPlan && preFillPlan.skippedFields) || []) {
+      lines.push(`- **${s.field}**: ${s.reason}`);
+    }
     lines.push('');
 
     return lines.join('\n');
@@ -231,16 +317,16 @@ class ApplyPackGenerator {
       fs.mkdirSync(appDir, { recursive: true });
     }
 
+    const dossier = packData.dossier || PLAN_DOSSIERS.get(packData.preFillPlan) || null;
+    const { artifacts, artifactNotes } = ApplyPackGenerator.renderArtifacts(appDir, slug, dossier, packData);
+
     const fullPackData = {
       company,
       roleTitle,
       jobUrl: packData.jobUrl || '',
       matchScore: packData.matchScore,
-      artifacts: packData.artifacts || {
-        cvDocx: `CV_${slug}.docx`,
-        cvPdf: `CV_${slug}.pdf`,
-        coverLetterDocx: `CoverLetter_${slug}.docx`
-      },
+      artifacts,
+      artifactNotes,
       claimsUsed: packData.claimsUsed || [],
       reviewVerdict: packData.reviewVerdict || null,
       verification: packData.verification || null,
@@ -256,7 +342,9 @@ class ApplyPackGenerator {
       slug,
       dir: appDir,
       filePath,
-      relativePath: path.join('applications', slug, 'apply-pack.md')
+      relativePath: path.join('applications', slug, 'apply-pack.md'),
+      artifacts,
+      artifactNotes
     };
   }
 }

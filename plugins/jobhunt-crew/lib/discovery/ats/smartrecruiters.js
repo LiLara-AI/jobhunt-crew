@@ -84,7 +84,9 @@ class SmartRecruitersAdapter extends BaseAtsAdapter {
     const limit = options.limit || 10;
 
     const allNormalized = await this.paginate(async ({ offset }) => {
-      const url = `${base}/v1/companies/${encodeURIComponent(companyIdentifier)}/postings?limit=${limit}&offset=${offset}`;
+      // Group boards (e.g. Delivery Hero) span many markets; `country` narrows to one.
+      const countryParam = options.country ? `&country=${encodeURIComponent(options.country)}` : '';
+      const url = `${base}/v1/companies/${encodeURIComponent(companyIdentifier)}/postings?limit=${limit}&offset=${offset}${countryParam}`;
       const res = await this.fetchWithRetry(url, options);
 
       if (!res.success || !res.data) {

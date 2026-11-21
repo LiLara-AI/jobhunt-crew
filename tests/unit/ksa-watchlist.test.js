@@ -70,13 +70,15 @@ describe('discover getDefaultSweepTargets', () => {
       assert.ok(t.company && typeof t.company === 'string');
     }
     const keys = targets.map(t => `${t.provider}:${t.slug.toLowerCase()}`);
-    assert.strictEqual(new Set(keys).size, keys.length, 'targets are de-duplicated');
+    const fullKeys = targets.map(t => `${t.provider}:${JSON.stringify(t.target)}`);
+    assert.strictEqual(new Set(fullKeys).size, fullKeys.length, 'targets are de-duplicated');
     // The previously hardcoded boards are all present via the watchlist.
+    // Boards verified live (HTTP 200 with jobs); the earlier guessed slugs all 404'd.
     for (const expected of [
-      'greenhouse:salla',
-      'lever:tamara',
-      'ashby:lean-technologies',
-      'smartrecruiters:hungerstation'
+      'workable:salla',
+      'greenhouse:tamara',
+      'ashby:leantech',
+      'smartrecruiters:deliveryhero'
     ]) {
       assert.ok(keys.includes(expected), `missing expected target ${expected}`);
     }
@@ -102,6 +104,6 @@ describe('discover getDefaultSweepTargets', () => {
   test('falls back to the built-in boards only when the watchlist yields none', () => {
     const targets = getDefaultSweepTargets([]);
     assert.strictEqual(targets.length, 4);
-    assert.ok(targets.some(t => t.provider === 'greenhouse' && t.slug === 'salla'));
+    assert.ok(targets.some(t => t.provider === 'workable' && t.slug === 'salla'));
   });
 });

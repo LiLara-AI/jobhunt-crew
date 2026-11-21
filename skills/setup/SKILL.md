@@ -20,7 +20,10 @@ or when no `dossier.json` / `.crew/` exists in the workspace yet.
    Note whether `.crew/ledger.jsonl`, `dossier.json`, and `.pii-denylist` exist.
    If the workspace is already initialized, ask whether to resume or rebuild.
 2. **Get the resume.** Ask for a resume file path or pasted text, one question only.
-   Parse employers, titles, dates, and measurable outcomes into draft claims.
+   Accepted files: `.docx`, `.txt`, `.md`. A PDF cannot be read by the engine:
+   read it yourself if your app can open PDFs, otherwise ask the user to paste
+   the text. Parse employers, titles, dates, and measurable outcomes into draft claims.
+   Never fall back to example or template data.
 3. **Suggest titles.** Present Lateral, Stretch, and Pivot title options, each tied
    to a quoted resume line. Let the user keep, drop, or add titles.
 4. **Locations.** Ask country first, then cities (two separate turns). Include
@@ -36,6 +39,12 @@ or when no `dossier.json` / `.crew/` exists in the workspace yet.
 9. **Initialize.** Run `crew init` for the workspace, then write the
    confirmed profile to `dossier.json`. Tag every stored fact pattern as a claim
    (`[C-01]`, `[C-02]`, ...). Anything the user has not confirmed stays `[CONFIRM]`.
+   Read each claim back to the user. For the ones they confirm, call
+   `crew_confirm_claims` (or `crew claim confirm --id <ids>`). Unconfirmed claims
+   block draft verification and packaging, so do not skip this, and never
+   confirm a claim the user has not approved in this conversation.
+   Write the target titles, cities, countries, knockouts and watchlist to
+   `search-config.json` as well; job scoring reads them from there.
    The intake flow is backed by `lib/honest-cv/intake-wizard.js` (`IntakeWizard`,
    `TitleFinder.generateRecommendations`, `WorkspaceBuilder.build`) and the dossier
    model in `lib/honest-cv/dossier.js` (`CareerDossier.createTemplate`).
@@ -68,5 +77,5 @@ node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job
 
 ## Tool reference
 
-- MCP: `crew_doctor`, `crew_record_event`, `crew_get_snapshot`
-- CLI: `crew init`, `crew doctor`, `crew ledger replay`
+- MCP: `crew_doctor`, `crew_confirm_claims`, `crew_record_event`, `crew_get_snapshot`
+- CLI: `crew init`, `crew doctor`, `crew claim confirm`, `crew ledger replay`

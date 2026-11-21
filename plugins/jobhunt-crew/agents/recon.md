@@ -34,7 +34,7 @@ Execute sweeps across four distinct channels:
 2. **Channel 2 — Direct ATS API Sweeps:**
    Run `node <plugin root>/cli/crew.js discover sweep --workspace <folder>` to query direct JSON endpoints for Greenhouse, Lever, Ashby, Workday (`wday/cxs`), SmartRecruiters, and Oracle Cloud HCM.
 3. **Channel 3 — 40+ Enterprise & Giga-Project Watchlist:**
-   Sweep targeted careers portals across Vision 2030 giga-projects (NEOM, Red Sea Global, Qiddiya, ROSHN, Diriyah) and national champions (STC, Elm, Almarai, SABIC).
+   Channel 2 already sweeps every watchlist employer that has a public job feed. The rest (Aramco, STC, SABIC, NEOM, the banks and others on SuccessFactors, Talentera or custom portals) have none: run `node <plugin root>/cli/crew.js discover manual --workspace <folder>` to list their careers pages, open each in the attended browser, and record matching roles with `crew job add`. A sweep line that says a board "could not be read" is a broken source, not an empty one; report it.
 4. **Channel 4 — Transversal Search Discovery:**
    Execute search engine queries (`site:myworkdayjobs.com`, `site:greenhouse.io`, etc.) targeting specific titles and locations to uncover unindexed corporate boards.
 

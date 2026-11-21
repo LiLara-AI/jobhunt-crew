@@ -39,8 +39,10 @@ class DocumentValidator {
       if (!documentXml.includes('<w:bidi/>') && !documentXml.includes('<w:bidi')) {
         throw new Error('Invalid Arabic DOCX: Missing <w:bidi/> RTL direction tag');
       }
-      if (!documentXml.includes('<w:jc w:val="right"/>')) {
-        throw new Error('Invalid Arabic DOCX: Missing right-aligned justification <w:jc w:val="right"/>');
+      // Word reads jc="right" on a bidi paragraph as the trailing (left) edge, so it must be absent:
+      // a bidi paragraph is right-aligned by default.
+      if (documentXml.includes('<w:jc w:val="right"/>')) {
+        throw new Error('Invalid Arabic DOCX: <w:jc w:val="right"/> left-aligns a bidi paragraph in Word');
       }
     }
     return true;
@@ -78,7 +80,7 @@ class ReferenceDocGenerator {
   static createDocxXml(content, isArabicRtl = false) {
     let pPr = '';
     if (isArabicRtl) {
-      pPr = '<w:pPr><w:bidi/><w:jc w:val="right"/></w:pPr>';
+      pPr = '<w:pPr><w:bidi/></w:pPr>';
     }
     return [
       '<w:document xml:lang="en" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">',
@@ -110,7 +112,7 @@ suite.test('DOCX XML generator produces valid OpenXML body envelope', assert => 
   assert.ok(DocumentValidator.validateDocxXml(prodXml, false));
 });
 
-suite.test('Arabic RTL document generator injects <w:bidi/> and right-alignment properties', assert => {
+suite.test('Arabic RTL document generator injects <w:bidi/> so paragraphs start at the right edge', assert => {
   const arabicText = 'مهندس معماري رئيسي للأنظمة الموزعة مع خبرة تزيد عن 12 عاماً';
   const rtlXml = ReferenceDocGenerator.createDocxXml(arabicText, true);
   assert.ok(DocumentValidator.validateDocxXml(rtlXml, true));

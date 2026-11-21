@@ -31,6 +31,9 @@ class AshbyAdapter extends BaseAtsAdapter {
         postings = Array.isArray(data.jobBoard.jobPostings) ? data.jobBoard.jobPostings : [];
       } else if (Array.isArray(data.jobPostings)) {
         postings = data.jobPostings;
+      } else if (Array.isArray(data.jobs)) {
+        // Live posting-api shape: { jobs: [{ location, department, isListed }] }
+        postings = data.jobs.filter(p => !p || p.isListed !== false);
       } else if (Array.isArray(data)) {
         postings = data;
       }
@@ -43,8 +46,8 @@ class AshbyAdapter extends BaseAtsAdapter {
       .map(p => {
       const postId = String(p.id);
       const reqId = p.externalId || postId;
-      const location = p.locationName || '';
-      const dept = p.departmentName || null;
+      const location = p.locationName || (typeof p.location === 'string' ? p.location : '') || '';
+      const dept = p.departmentName || p.department || null;
       const compensation = p.compensation ? (p.compensation.compensationTierSummary || null) : null;
 
       let remoteStatus = 'unknown';

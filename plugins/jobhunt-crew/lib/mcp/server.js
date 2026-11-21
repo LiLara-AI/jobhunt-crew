@@ -30,6 +30,8 @@ const { scanClosingSoonAlerts } = require('../operational/alerts');
 const { generateRetrospective } = require('../operational/retrospective');
 const { exportDashboard } = require('../command-center/exporter');
 const { ContactTracker } = require('../operational/contacts');
+const { normalizeJobUrl, checkDuplicateRequisition, generateRequisitionKey } = require('../guardrails/dedup');
+const { resolveWorkspace, workspaceRefusal } = require('../cli/shared');
 
 // lib/operational/migrate-legacy.js is owned by another workstream and may not
 // exist yet. Resolve it lazily so the server still starts without it.
@@ -48,15 +50,38 @@ function looksLikeMissingFile(value) {
   return typeof value === 'string' && !/[\r\n]/.test(value) && /\.(md|markdown|txt|html?|json|docx?|pdf|rtf)$/i.test(value.trim());
 }
 
+const STORIES_FILE = 'stories.json';
+
+/**
+ * Loads interview stories saved by crew_interview_story into the bank and
+ * returns the saved list. A story whose claim no longer validates against the
+ * dossier is skipped rather than failing every story call.
+ */
+function loadSavedStories(workspace, bank) {
+  const file = path.join(workspace, '.crew', STORIES_FILE);
+  let saved = [];
+  try {
+    if (fs.existsSync(file)) saved = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (_) { saved = []; }
+  if (!Array.isArray(saved)) saved = [];
+  for (const story of saved) {
+    try { bank.addStory({ ...story }); } catch (_) {}
+  }
+  return saved;
+}
+
 const SERVER_NAME = 'jobhunt-crew-mcp';
-const SERVER_VERSION = '0.2.3';
+const SERVER_VERSION = '0.2.4';
 const PROTOCOL_VERSION = '2024-11-05';
 // Versions this server can speak; echo the client's if listed, else fall back.
 const SUPPORTED_PROTOCOL_VERSIONS = ['2024-11-05', '2025-03-26', '2025-06-18'];
 
 class McpServer {
   constructor(options = {}) {
-    this.workspace = options.workspace ? path.resolve(options.workspace) : process.cwd();
+    // Precedence: explicit option (the --workspace flag), CREW_WORKSPACE, then cwd.
+    this.workspace = resolveWorkspace({ workspace: options.workspace }, { guard: false });
+    // Hosts launch MCP servers from the plugin folder or the home directory; refuse to write .crew/ there.
+    this.workspaceError = workspaceRefusal(this.workspace);
     this.crewDir = path.join(this.workspace, '.crew');
     this.ledgerPath = path.join(this.crewDir, 'ledger.jsonl');
     this.snapshotPath = path.join(this.crewDir, 'snapshot.json');
@@ -178,7 +203,7 @@ class McpServer {
 
     this.tools.set('crew_doctor', {
       name: 'crew_doctor',
-      description: 'Inspects system health, runtime state, lock status, and PII denylist configuration.',
+      description: 'Inspects system health, runtime state, lock status, and PII denylist configuration. Reports the absolute workspace folder in use and whether a candidate dossier exists there.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -186,6 +211,28 @@ class McpServer {
         }
       },
       handler: (args) => this.toolDoctor(args)
+    });
+
+    this.tools.set('crew_confirm_claims', {
+      name: 'crew_confirm_claims',
+      description: 'Marks dossier claims as VERIFIED. Call ONLY after the candidate has confirmed each of those facts in this conversation; never to unblock a draft on your own. Unconfirmed claims block verification and packaging.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          claim_ids: { type: 'array', items: { type: 'string' }, description: 'Claim IDs the candidate confirmed' },
+          all: { type: 'boolean', description: 'Confirm every claim (only when the candidate reviewed the full list)' },
+          evidence: { type: 'string', description: 'Optional note on how the candidate confirmed it' },
+          dossier_path: { type: 'string', description: 'Optional path to candidate dossier JSON' }
+        }
+      },
+      handler: (args) => {
+        const { confirmClaimsInFile, findDossierFile } = require('../cli/commands/claim');
+        const ids = args.all === true ? 'all' : (Array.isArray(args.claim_ids) ? args.claim_ids : []);
+        if (ids !== 'all' && ids.length === 0) throw new Error('Provide "claim_ids" or "all": true');
+        const file = findDossierFile(this.workspace, args.dossier_path);
+        if (!fs.existsSync(file)) throw new Error(`Dossier file not found: ${file}`);
+        return confirmClaimsInFile(file, ids, args.evidence);
+      }
     });
 
     this.tools.set('crew_verify_draft', {
@@ -197,6 +244,7 @@ class McpServer {
           draft_path: { type: 'string', description: 'Path to draft text file, or inline text string' },
           dossier_path: { type: 'string', description: 'Optional path to candidate dossier JSON (defaults to <workspace>/dossier.json)' },
           job_id: { type: 'string', description: 'Optional vacancy ID' },
+          company: { type: 'string', description: 'Optional target employer name (taken from job_id when omitted)' },
           claim_ids: {
             type: 'array',
             items: { type: 'string' },
@@ -233,13 +281,17 @@ class McpServer {
 
     this.tools.set('crew_discover_sweep', {
       name: 'crew_discover_sweep',
-      description: 'Sweeps one ATS board (greenhouse, lever, ashby, workday, smartrecruiters, oracle) for live vacancies via DiscoveryEngine.sweepAts.',
+      description: 'Sweeps one ATS board (greenhouse, lever, ashby, workday, smartrecruiters, oracle, ...) for live vacancies via DiscoveryEngine.sweepAts. Set ingest=true to record new vacancies in the ledger (deduplicated against tracked jobs).',
       inputSchema: {
         type: 'object',
         properties: {
           provider: { type: 'string', description: 'ATS provider key' },
-          target: { type: 'string', description: 'Board token, company slug, or board URL' },
-          limit: { type: 'integer', description: 'Optional maximum vacancies to return' }
+          target: {
+            type: ['string', 'object'],
+            description: 'Board token or company slug (string), or a board config object: Workday { tenant, dc, site }, Oracle { host, site }'
+          },
+          limit: { type: 'integer', description: 'Optional maximum vacancies to return' },
+          ingest: { type: 'boolean', description: 'Record each new vacancy as a JOB_DISCOVERED ledger event', default: false }
         },
         required: ['provider', 'target']
       },
@@ -394,7 +446,7 @@ class McpServer {
 
     this.tools.set('crew_interview_story', {
       name: 'crew_interview_story',
-      description: 'Manages STAR+R interview stories bound to dossier claims: list confirmed stories, validate and add a story, or compile an interview pack.',
+      description: 'Manages STAR+R interview stories bound to dossier claims: list confirmed stories, validate and add a story (saved to .crew/stories.json), or compile an interview pack.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -421,10 +473,10 @@ class McpServer {
           total_salary: { type: 'number', description: 'Monthly gross salary (evaluate, salary)' },
           basic: { type: 'number', description: 'Monthly basic salary when gross is unknown' },
           housing: { type: 'number', description: 'Monthly housing allowance (gosi wage object)' },
-          is_saudi_national: { type: 'boolean', description: 'GOSI nationality branch', default: true },
+          is_saudi_national: { type: 'boolean', description: 'GOSI nationality branch: true for a Saudi national; omitted or false means non-Saudi (expatriate)', default: false },
           monthly_wage: { type: 'number', description: 'Basic plus housing wage for EOSB' },
-          tenure_years: { type: 'number', description: 'Service years for EOSB' },
-          separation_type: { type: 'string', enum: ['TERMINATION', 'CONTRACT_EXPIRY', 'RESIGNATION'], description: 'EOSB separation type' },
+          tenure_years: { type: 'number', description: 'Service years for EOSB (eosb, evaluate)' },
+          separation_type: { type: 'string', enum: ['TERMINATION', 'CONTRACT_EXPIRY', 'RESIGNATION'], description: 'EOSB separation type (eosb, evaluate)' },
           probation_days: { type: 'integer', description: 'Probation length in days (evaluate)' },
           non_compete_months: { type: 'number', description: 'Non-compete duration in months' },
           non_compete_scope: { type: 'string', description: 'Non-compete geographic scope text' },
@@ -630,7 +682,7 @@ class McpServer {
     const snapshot = this.readSnapshot();
 
     if (!filter.status && !filter.company && !filter.limit) {
-      return snapshot;
+      return { workspace: this.workspace, ...snapshot };
     }
 
     let jobs = Object.values(snapshot.jobs || {});
@@ -645,6 +697,7 @@ class McpServer {
     }
 
     return {
+      workspace: this.workspace,
       version: snapshot.version,
       lastEventId: snapshot.lastEventId,
       updatedAt: snapshot.updatedAt,
@@ -805,9 +858,21 @@ class McpServer {
       message: hasDenylist ? 'CONFIGURED' : 'MISSING'
     });
 
+    // 5. Candidate dossier (same lookup order as loadDossier)
+    const dossierPath = [path.join(this.crewDir, 'dossier.json'), path.join(this.workspace, 'dossier.json')]
+      .find(p => fs.existsSync(p)) || null;
+    checks.push({
+      name: 'Candidate dossier (dossier.json)',
+      pass: Boolean(dossierPath),
+      critical: false,
+      message: dossierPath ? 'FOUND' : 'MISSING'
+    });
+
     const hasFailure = checks.some(c => c.critical && !c.pass);
     return {
       status: hasFailure ? 'FAIL' : 'PASS',
+      workspace: this.workspace,
+      dossier: { exists: Boolean(dossierPath), path: dossierPath },
       checks
     };
   }
@@ -827,7 +892,10 @@ class McpServer {
       throw new Error(`Draft file not found: ${resolvedDraftPath}`);
     }
 
-    const result = ClaimVerifier.verifyDraft(dossier, draftText, { claimIds: claim_ids });
+    // The employer being applied to is a legitimate name in a cover letter.
+    const targetCompany = args.company ||
+      (args.job_id && ((this.readSnapshot().jobs || {})[args.job_id] || {}).company) || undefined;
+    const result = ClaimVerifier.verifyDraft(dossier, draftText, { claimIds: claim_ids, targetCompany });
 
     // With a job_id the verdict is recorded, so apply packs and the submit gate can see it.
     let recorded = false;
@@ -903,12 +971,69 @@ class McpServer {
   async toolDiscoverSweep(args) {
     const { provider, target, limit } = args;
     if (!provider) throw new Error('Parameter "provider" is required');
-    if (!target) throw new Error('Parameter "target" is required');
+    if (!target || (typeof target !== 'string' && (typeof target !== 'object' || Array.isArray(target)))) {
+      throw new Error('Parameter "target" is required: a board slug string, or an object such as { tenant, dc, site } (Workday) or { host, site } (Oracle)');
+    }
+    const ingest = args.ingest === true;
     const engine = new DiscoveryEngine({ workspaceDir: this.workspace });
     const result = await engine.sweepAts(provider, target, typeof limit === 'number' ? { limit } : {});
-    const jobs = Array.isArray(result) ? result : (result && Array.isArray(result.jobs) ? result.jobs : []);
-    const capped = typeof limit === 'number' && limit > 0 ? jobs.slice(0, limit) : jobs;
-    return { provider, target, count: capped.length, jobs: capped, raw: Array.isArray(result) ? undefined : result };
+    const found = Array.isArray(result) ? result : (result && Array.isArray(result.jobs) ? result.jobs : []);
+    const capped = typeof limit === 'number' && limit > 0 ? found.slice(0, limit) : found;
+
+    // Same dedup/ingest steps as the CLI `discover sweep` (lib/cli/commands/discover.js).
+    const existingJobs = Object.values(this.readSnapshot().jobs || {});
+    const jobs = [];
+    let ingested = 0;
+    let duplicates = 0;
+    for (const cand of capped) {
+      const cleanUrl = normalizeJobUrl(cand.url);
+      const reqKey = generateRequisitionKey(cand.company, cand.title, cleanUrl, {
+        location: cand.location,
+        requisitionId: cand.requisitionId
+      });
+      const candidateObj = {
+        id: cand.id || `job_${reqKey.slice(0, 10)}`,
+        title: cand.title,
+        company: cand.company,
+        location: cand.location,
+        url: cleanUrl,
+        rawUrl: cand.url,
+        requisitionId: cand.requisitionId || '',
+        requisitionKey: reqKey,
+        channel: cand.source || 'ats',
+        source: cand.source || 'ats',
+        remoteStatus: cand.remoteStatus,
+        department: cand.department,
+        compensation: cand.compensation,
+        postedAt: cand.postedAt,
+        postedAgeDays: cand.postedAt ? Math.max(0, Math.floor((Date.now() - new Date(cand.postedAt).getTime()) / 86400000)) : 0,
+        rawPayload: cand.rawPayload
+      };
+      const isDuplicate = checkDuplicateRequisition(existingJobs, candidateObj, { throwOnError: false }).isDuplicate;
+      if (isDuplicate) duplicates++;
+      else if (ingest) {
+        await this.ledger.appendEvent({ event: 'JOB_DISCOVERED', payload: candidateObj, actor: 'agent:recon' });
+        ingested++;
+      }
+      // Within one sweep a repeated posting counts as a duplicate whether or not it is ingested.
+      if (!isDuplicate) existingJobs.push(candidateObj);
+      // The model gets a slim row; rawPayload (full posting JSON) stays in the ledger only.
+      jobs.push({
+        id: candidateObj.id,
+        title: candidateObj.title,
+        company: candidateObj.company,
+        location: candidateObj.location,
+        url: candidateObj.url,
+        postedAt: candidateObj.postedAt,
+        remoteStatus: candidateObj.remoteStatus,
+        department: candidateObj.department,
+        duplicate: isDuplicate
+      });
+    }
+    if (ingested > 0) {
+      await replayLedger({ workspaceDir: this.workspace, ledgerPath: this.ledgerPath, snapshotPath: this.snapshotPath, rebuild: false });
+    }
+    return { provider, target, found: capped.length, ingested, duplicates, count: jobs.length, jobs };
   }
 
   async toolDiscoverSmoke(args) {
@@ -1011,6 +1136,8 @@ class McpServer {
       slug: written.slug,
       filePath: written.filePath,
       relativePath: written.relativePath,
+      artifacts: written.artifacts,
+      artifactNotes: written.artifactNotes,
       screeningAnswers,
       safetyGate: preFillPlan.safetyGate
     };
@@ -1048,15 +1175,24 @@ class McpServer {
     if (!action) throw new Error('Parameter "action" is required');
     const dossier = this.loadDossier(args.dossier_path) || {};
     const bank = new StarRStoryBank(dossier);
+    const saved = loadSavedStories(this.workspace, bank);
     switch (action) {
       case 'list':
         return { stories: bank.getStoriesForRole({}) };
       case 'add': {
         if (!args.story || typeof args.story !== 'object') throw new Error('Parameter "story" is required for action "add"');
-        const validated = bank.addStory({ ...args.story });
-        // StarRStoryBank is in-memory; persistence happens when the candidate
-        // saves the story into dossier.json (storyBank array).
-        return { success: true, persisted: false, story: validated };
+        // Own id namespace: the bank numbers id-less dossier stories by position, which would collide with saved ones.
+        let id = args.story.id;
+        for (let n = saved.length + 1; !id; n++) {
+          if (!bank.stories.has(`saved_story_${n}`)) id = `saved_story_${n}`;
+        }
+        const validated = bank.addStory({ ...args.story, id });
+        // StarRStoryBank is in-memory, so added stories are kept in .crew/stories.json (same id replaces).
+        // The input is stored, not the validated copy, so status and rubric are re-derived from the dossier on each load.
+        const storiesPath = path.join(this.crewDir, STORIES_FILE);
+        fs.mkdirSync(this.crewDir, { recursive: true });
+        fs.writeFileSync(storiesPath, JSON.stringify([...saved.filter(s => s.id !== id), { ...args.story, id }], null, 2), 'utf8');
+        return { success: true, persisted: true, storiesPath, story: validated };
       }
       case 'pack': {
         const job = this.resolveJobRecord(args);
@@ -1073,7 +1209,8 @@ class McpServer {
   async toolKsaOffer(args) {
     const { action } = args;
     if (!action) throw new Error('Parameter "action" is required');
-    const isSaudi = args.is_saudi_national !== false;
+    // Not stated means non-Saudi (expatriate), the same default as the CLI and the library.
+    const isSaudi = args.is_saudi_national === true;
     switch (action) {
       case 'salary': {
         const amount = typeof args.total_salary === 'number' ? args.total_salary : args.basic;
@@ -1106,7 +1243,9 @@ class McpServer {
           basic: args.basic,
           housing: args.housing,
           transport: args.transport,
-          isSaudiNational: isSaudi,
+          isSaudiNational: typeof args.is_saudi_national === 'boolean' ? isSaudi : undefined,
+          tenureYears: args.tenure_years,
+          separationType: args.separation_type,
           probationDays: args.probation_days,
           nonCompeteMonths: args.non_compete_months,
           nonCompeteScope: args.non_compete_scope,
@@ -1253,6 +1392,7 @@ class McpServer {
   async callTool(name, args = {}) {
     const tool = this.tools.get(name);
     if (!tool) throw new Error(`Tool not found: ${name}`);
+    if (this.workspaceError) throw new Error(this.workspaceError);
     return tool.handler(args || {});
   }
 
@@ -1333,6 +1473,7 @@ class McpServer {
 
   start() {
     process.stderr.write(`[MCP] Starting ${SERVER_NAME} v${SERVER_VERSION} (stdio transport)...\n`);
+    if (this.workspaceError) process.stderr.write(`[MCP] ${this.workspaceError}\n`);
     this.rl = readline.createInterface({
       input: process.stdin,
       terminal: false
@@ -1453,6 +1594,7 @@ class McpServer {
 
 module.exports = {
   McpServer,
+  loadSavedStories,
   SERVER_NAME,
   SERVER_VERSION,
   PROTOCOL_VERSION,

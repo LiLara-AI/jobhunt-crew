@@ -18,7 +18,7 @@ class WorkableAdapter extends BaseAtsAdapter {
       const location = [j.city, j.state, j.country].filter(Boolean).join(', ')
         || String(j.location_str || j.location || '');
       const title = String(j.title || j.name || '');
-      const isRemote = j.remote === true || /remote/i.test(String(j.workplace || ''));
+      const isRemote = j.remote === true || j.telecommuting === true || /remote/i.test(String(j.workplace || ''));
       const rawUrl = j.url || j.application_url || j.shortlink
         || `https://apply.workable.com/${account}/j/${j.shortcode || jobId}/`;
       return {
@@ -31,7 +31,7 @@ class WorkableAdapter extends BaseAtsAdapter {
         remoteStatus: isRemote ? 'remote' : (/hybrid/i.test(location + ' ' + title) ? 'hybrid' : (location ? 'onsite' : 'unknown')),
         department: j.department || null,
         compensation: null,
-        postedAt: safeIsoDate(j.published_at || j.created_at || j.updated_at),
+        postedAt: safeIsoDate(j.published_on || j.published_at || j.created_at || j.updated_at),
         rawPayload: j,
         source: 'workable'
       };
@@ -40,12 +40,11 @@ class WorkableAdapter extends BaseAtsAdapter {
 
   async fetchBoard(account, options = {}) {
     const base = this.baseUrl || this.defaultBaseUrl;
-    const url = `${base}/api/v3/accounts/${encodeURIComponent(account)}/jobs`;
-    const res = await this.fetchWithRetry(url, {
-      method: 'POST',
-      body: { query: options.searchText || '', location: [], department: [], worktype: [], remote: [] },
-      ...options
-    });
+    // Widget API: one GET, all published jobs, with city/state/country and url.
+    // (The v3 search API pages at 10 and reports state "published" where the
+    // widget reports the region, which mislabelled every location.)
+    const url = `${base}/api/v1/widget/accounts/${encodeURIComponent(account)}`;
+    const res = await this.fetchWithRetry(url, options);
     if (!res.success || !res.data) return [];
     return WorkableAdapter.parseJobs(res.data, account, options);
   }

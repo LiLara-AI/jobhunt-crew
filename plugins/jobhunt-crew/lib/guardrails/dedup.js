@@ -151,7 +151,7 @@ function normalizeJobUrl(rawUrl) {
     u.searchParams.sort();
 
     // 5. Normalize trailing slash
-    let pathname = u.pathname.toLowerCase();
+    let pathname = /(^|\.)oraclecloud\.com$/.test(u.hostname) ? u.pathname : u.pathname.toLowerCase();
     if (pathname.length > 1 && pathname.endsWith('/')) {
       pathname = pathname.slice(0, -1);
     }

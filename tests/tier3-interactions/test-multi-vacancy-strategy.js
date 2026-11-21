@@ -19,7 +19,11 @@ suite.test('Multi-vacancy strategist recommends apply vs skip with reasons and g
     { id: 'v3', title: 'Junior Cloud Operations Technician', level: 'Junior', department: 'IT Support' }
   ];
 
-  const candidateProfile = { currentTitle: 'Principal Platform Architect' };
+  // Bridging claims come from the dossier; the strategist never invents claim ids.
+  const candidateProfile = {
+    currentTitle: 'Principal Platform Architect',
+    dossier: { claims: [{ id: 'CLM-001', status: 'VERIFIED' }, { id: 'CLM-002', status: 'VERIFIED' }, { id: 'CLM-003', status: 'CONFIRM' }] }
+  };
 
   const plan = MultiVacancyStrategist.evaluateCompanyVacancies(company, vacancies, candidateProfile);
 
@@ -32,7 +36,7 @@ suite.test('Multi-vacancy strategist recommends apply vs skip with reasons and g
   // Exactly 1 convergent CV
   assert.ok(plan.convergentCv);
   assert.equal(plan.convergentCv.targetJobIds.length, 2);
-  assert.ok(plan.convergentCv.coreClaimIds.length >= 2);
+  assert.deepEqual(plan.convergentCv.coreClaimIds, ['CLM-001', 'CLM-002']);
 
   // Per-role cover letters
   assert.equal(plan.perRoleCoverLetters.length, 2);

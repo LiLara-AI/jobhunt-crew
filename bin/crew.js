@@ -49,6 +49,9 @@ Commands:
   discover sweep [--ats <name>] [--channel <name>] [--offline] [--limit <n>]
       Run multi-channel job discovery sweep across ATS and job boards
 
+  discover manual [--json]
+      List watchlist employers that need a browser visit (no public job feed)
+
   discover smoke [--ats <name>] [--board <name>] [--all] [--offline] [--json]
       Execute live (or offline) schema smoke test on public ATS boards
 
@@ -115,7 +118,10 @@ Commands:
   mcp [--workspace <dir>]
       Start native Model Context Protocol (MCP) JSON-RPC 2.0 stdio server
 
-  claim verify --dossier <d> --draft <p> [--json]
+  claim confirm --id <C-01,C-02> | --all [--evidence <text>] [--workspace <dir>]
+      Mark dossier facts as confirmed by you (unconfirmed facts block drafts)
+
+  claim verify --dossier <d> --draft <p> [--company <employer>] [--json]
       Run deterministic AST claim verification (Milestone M3)
 
   review record --job-id <i> --verdict <v> --notes <n>

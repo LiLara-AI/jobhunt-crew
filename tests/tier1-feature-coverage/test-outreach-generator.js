@@ -80,14 +80,14 @@ suite.test('OutreachGenerator customizes message angle per persona', assert => {
   assert.ok(recruiterDraft.message.includes('available immediately'));
   assert.ok(recruiterDraft.message.includes('recently applied for the Principal Distributed Systems Engineer position'));
 
-  // Peer: emphasizes shared engineering craft and architecture
+  // Peer: interest in the team's work, with no profession assumed that the dossier does not state
   const peerDraft = OutreachGenerator.generateOutreach({
     persona: 'PEER',
     jobRecord,
     dossier
   });
-  assert.ok(peerDraft.message.includes('fellow platform engineer'));
-  assert.ok(peerDraft.message.includes("NextGen Systems's engineering architecture"));
+  assert.equal(/platform engineer|engineering architecture/.test(peerDraft.message), false);
+  assert.ok(peerDraft.message.includes('the work your team does at NextGen Systems'));
 });
 
 suite.test('OutreachGenerator truncates oversized text cleanly at word boundaries', assert => {

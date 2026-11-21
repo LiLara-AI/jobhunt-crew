@@ -11,7 +11,7 @@ JobHunt Crew is a local, multi-agent job-search crew that finds roles, tailors h
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-16a34a"></a>
   <img alt="Node 18+" src="https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white">
   <img alt="zero dependencies" src="https://img.shields.io/badge/dependencies-0-0ea5e9">
-  <img alt="912 checks passing" src="https://img.shields.io/badge/tests-912%20passing-16a34a">
+  <img alt="922 checks passing" src="https://img.shields.io/badge/tests-922%20passing-16a34a">
   <img alt="local first" src="https://img.shields.io/badge/data-100%25%20local-7c3aed">
 </p>
 
@@ -404,7 +404,7 @@ A companion edition for the Gemini desktop app reads `.crew/snapshot.json`, watc
 
 ```bash
 git clone https://github.com/LiLara-AI/jobhunt-crew.git && cd jobhunt-crew
-npm test                     # end-to-end suite (912 checks)
+npm test                     # end-to-end suite (922 checks)
 npm run test:unit            # unit tests
 npm run test:all             # + clean-room, zero-PII, forbidden-token, packaging gates
 ```
