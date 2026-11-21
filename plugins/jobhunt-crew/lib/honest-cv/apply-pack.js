@@ -188,7 +188,7 @@ class ApplyPackGenerator {
     const reviewVerdict = app && app.review
       ? { verdict: app.review.verdict, overallScore: app.review.score }
       : null;
-    // PACKAGE_MARKED_READY already required a passed verification and an APPROVE review.
+    // A "ready" status is trusted as the submit gate trusts it; it does not prove a recorded check.
     const ready = Boolean((app && app.status === 'ready') || (job && job.status === 'ready'));
     return { verification, reviewVerdict, ready };
   }
@@ -196,8 +196,8 @@ class ApplyPackGenerator {
   /**
    * Gate shared by the MCP tool and the CLI. Throws when the job's recorded
    * verification failed (rule 3: no pack on a rejected draft); otherwise lists
-   * what is not yet recorded as passed. Only recorded results count, because
-   * the submit gate reads the ledger too.
+   * what is not yet recorded as passed. Recorded results count, plus a "ready"
+   * status, which the submit gate also accepts.
    */
   static submissionBlockers(recorded) {
     const { verification, reviewVerdict, ready } = recorded || {};

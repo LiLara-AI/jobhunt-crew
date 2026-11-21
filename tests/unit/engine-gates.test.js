@@ -130,6 +130,10 @@ test('a backup written by the tool stays in the workspace, and a restore keeps t
     await server.callTool('crew_restore', { file: 'my-backup.json' });
     assert.equal(fs.readFileSync(path.join(ws, 'dossier.json.pre-restore'), 'utf8'), '{"claims":[]}');
     assert.equal(fs.readFileSync(path.join(ws, 'dossier.json'), 'utf8'), fs.readFileSync(EXAMPLE, 'utf8'));
+    // A second restore must not overwrite the first safety copy.
+    fs.writeFileSync(path.join(ws, 'dossier.json'), '{"claims":[1]}', 'utf8');
+    await server.callTool('crew_restore', { file: 'my-backup.json' });
+    assert.equal(fs.readFileSync(path.join(ws, 'dossier.json.pre-restore'), 'utf8'), '{"claims":[]}');
   } finally {
     fs.rmSync(ws, { recursive: true, force: true });
   }
@@ -149,5 +153,58 @@ test('a job marked ready needs no further checks, and an unrecorded verdict is l
     await assert.rejects(server.callTool('crew_record_event', { type: 'CLAIMS_VERIFIED', payload: { jobId: '__proto__', passed: true } }), /cannot be used as a job id/);
   } finally {
     fs.rmSync(ws, { recursive: true, force: true });
+  }
+});
+
+test('a recorded review that is not APPROVE blocks the pack, whatever verdict is passed in', async () => {
+  const { ws, server } = await workspace();
+  try {
+    await server.callTool('crew_verify_draft', { draft_path: GOOD, job_id: 'job_1' });
+    await server.callTool('crew_review_record', { job_id: 'job_1', verdict: 'REQUEST_CHANGES', overall_score: 2.1 });
+    const pack = await server.callTool('crew_apply_pack', { job_id: 'job_1', review_verdict: { verdict: 'APPROVE', overallScore: 4.9 } });
+    assert.equal(pack.status, 'blocked');
+    assert.equal(pack.blockers.length, 1);
+    const md = fs.readFileSync(pack.filePath, 'utf8');
+    assert.match(md, /Blind review: REQUEST_CHANGES/);
+    assert.doesNotMatch(md, /Blind review: APPROVE|4\.9 \/ 5\.0/);
+    // Exact match: a verdict that merely contains APPROVE is not an approval.
+    const { ApplyPackGenerator } = require('../../lib/honest-cv/apply-pack');
+    const recorded = ApplyPackGenerator.checksFromApplication({ verification: { passed: true }, review: { verdict: 'APPROVE_WITH_CHANGES' } });
+    assert.equal(ApplyPackGenerator.submissionBlockers(recorded).length, 1);
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true });
+  }
+});
+
+test('a FOLLOW_UP_SENT the reducer would ignore is refused by the tool and by crew ledger append', async () => {
+  const { ws, server } = await workspace();
+  try {
+    // job_1 is discovered but has no application yet.
+    await assert.rejects(server.callTool('crew_record_event', { type: 'FOLLOW_UP_SENT', payload: { jobId: 'job_1', day: 7 } }), /tracked application/);
+    await server.callTool('crew_verify_draft', { draft_path: GOOD, job_id: 'job_1' });
+    const cli = spawnSync(process.execPath, [CLI, 'ledger', 'append', '--event', 'FOLLOW_UP_SENT',
+      '--payload', JSON.stringify({ jobId: 'job_1', day: 3 }), '--workspace', ws], { encoding: 'utf8' });
+    assert.equal(cli.status, 1);
+    assert.match(cli.stderr, /day 7 or 14/);
+    await server.callTool('crew_record_event', { type: 'FOLLOW_UP_SENT', payload: { jobId: 'job_1', day: 7 } });
+    const snapshot = JSON.parse(fs.readFileSync(path.join(ws, '.crew', 'snapshot.json'), 'utf8'));
+    assert.deepEqual(snapshot.applications.job_1.followUps, { day7: true });
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true });
+  }
+});
+
+test('crew_read_resume refuses a link that leads outside the workspace and a file over 5 MB', async () => {
+  const { ws, server } = await workspace();
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-gates-outside-'));
+  try {
+    fs.writeFileSync(path.join(outsideDir, 'resume.md'), 'outside', 'utf8');
+    fs.symlinkSync(outsideDir, path.join(ws, 'linked'), 'junction');
+    await assert.rejects(server.callTool('crew_read_resume', { file: 'linked/resume.md' }), /inside the workspace/);
+    fs.writeFileSync(path.join(ws, 'big.txt'), Buffer.alloc(5 * 1024 * 1024 + 1, 'a'));
+    await assert.rejects(server.callTool('crew_read_resume', { file: 'big.txt' }), /larger than 5 MB/);
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
   }
 });
