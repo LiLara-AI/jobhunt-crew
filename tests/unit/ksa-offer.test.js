@@ -84,11 +84,29 @@ test('a stated zero-day probation is not replaced by the 90-day default', () => 
   assert.equal(KsaOfferCalculator.evaluateOffer({ totalSalary: 30000 }).probation.days, 90);
 });
 
-test('other fixed allowances count in the end-of-service wage through the tool', async () => {
+test('other fixed allowances are counted once in the end-of-service wage, whatever shape the offer takes', async () => {
   const { McpServer } = require('../../lib/mcp/server');
   const os = require('os');
   const server = new McpServer({ workspace: os.tmpdir() });
-  const base = await server.callTool('crew_ksa_offer', { action: 'evaluate', total_salary: 20000, basic: 13000, housing: 5000, transport: 2000, tenure_years: 5 });
-  const more = await server.callTool('crew_ksa_offer', { action: 'evaluate', total_salary: 20000, basic: 13000, housing: 5000, transport: 2000, regular_allowances: 1000, tenure_years: 5 });
-  assert.equal(more.eosbWageBasis.actualWage, base.eosbWageBasis.actualWage + 1000);
+  const evaluate = args => server.callTool('crew_ksa_offer', { action: 'evaluate', tenure_years: 5, ...args });
+  const parts = r => r.structure.basic + r.structure.housing + r.structure.transport;
+
+  // Full split, gross includes the allowance.
+  const full = await evaluate({ total_salary: 21000, basic: 13000, housing: 5000, transport: 2000, regular_allowances: 1000 });
+  assert.equal(full.eosbWageBasis.actualWage, 21000);
+  assert.deepEqual(full.structure.warnings.filter(w => w.code === 'COMPONENTS_EXCEED_GROSS'), []);
+
+  // Partial split: the missing parts are filled from what is left after the allowance.
+  const partial = await evaluate({ total_salary: 20000, basic: 12000, regular_allowances: 1000 });
+  assert.equal(parts(partial), 19000);
+  assert.equal(partial.eosbWageBasis.actualWage, 20000);
+
+  // Split without a gross: the gross is the parts plus the allowance.
+  const noGross = await evaluate({ basic: 13000, housing: 5000, transport: 2000, regular_allowances: 1000 });
+  assert.equal(noGross.structure.gross, 21000);
+  assert.equal(noGross.eosbWageBasis.actualWage, 21000);
+
+  // Gross only: it already contains the allowance, which must not be added again.
+  const grossOnly = await evaluate({ total_salary: 20000, regular_allowances: 1000 });
+  assert.equal(grossOnly.eosbWageBasis.actualWage, 20000);
 });

@@ -109,7 +109,7 @@ Commands:
   interview-story [--job-id <id>] [--dossier <path>] [--out <file>] [--json]
       Compile a STAR+R interview preparation pack from verified stories
 
-  ksa-offer (--gross <sar> | --basic <n> --housing <n> --transport <n>) [--allowances <n>] [--tenure <years>] [--saudi]
+  ksa-offer (--gross <sar> | --basic <n> --housing <n> --transport <n>) [--tenure <years>] [--saudi]
       Compute Saudi salary structure, GOSI, and end-of-service benefits
 
   cadence [--submitted <iso-date>] [--json] [--workspace <dir>]
