@@ -78,3 +78,17 @@ test('an offer with no non-compete clause is not reported as having an unbounded
   const worldwide = KsaOfferCalculator.evaluateOffer({ totalSalary: 30000, nonCompeteMonths: 12, nonCompeteScope: 'Worldwide' });
   assert.equal(worldwide.nonCompete.isValid, false);
 });
+
+test('a stated zero-day probation is not replaced by the 90-day default', () => {
+  assert.equal(KsaOfferCalculator.evaluateOffer({ totalSalary: 30000, probationDays: 0 }).probation.days, 0);
+  assert.equal(KsaOfferCalculator.evaluateOffer({ totalSalary: 30000 }).probation.days, 90);
+});
+
+test('other fixed allowances count in the end-of-service wage through the tool', async () => {
+  const { McpServer } = require('../../lib/mcp/server');
+  const os = require('os');
+  const server = new McpServer({ workspace: os.tmpdir() });
+  const base = await server.callTool('crew_ksa_offer', { action: 'evaluate', total_salary: 20000, basic: 13000, housing: 5000, transport: 2000, tenure_years: 5 });
+  const more = await server.callTool('crew_ksa_offer', { action: 'evaluate', total_salary: 20000, basic: 13000, housing: 5000, transport: 2000, regular_allowances: 1000, tenure_years: 5 });
+  assert.equal(more.eosbWageBasis.actualWage, base.eosbWageBasis.actualWage + 1000);
+});

@@ -20,7 +20,8 @@ drafting preference, change targets, or bring workspace state back in sync.
 3. **Apply the requested change, one topic at a time:**
    - New or corrected career facts: add them to `dossier.json` as new `[C-xx]`
      claims in the shape of the existing ones (`id`, `employerId` of an
-     existing `employers[]` entry, `text`, `metrics[]`, `tools[]`) with
+     `employers[]` entry, adding that entry first for a new job, `text`,
+     `metrics[]`, `tools[]`) with
      `"status": "CONFIRM"`. Never omit `status`: a claim without it counts as
      verified. Read the claim back; once the user confirms the exact wording,
      employer, and metric, call `crew_confirm_claims` with its id (CLI
@@ -39,9 +40,14 @@ drafting preference, change targets, or bring workspace state back in sync.
      `EditorialRuleEngine.learnRuleFromCorrection` in
      `lib/honest-cv/editorial-rules.js`). List rules with action `list`, preview
      with action `apply`, and revert a bad rule with action `undo`.
-4. **Re-verify affected drafts.** If a claim changed, re-run MCP
-   `crew_verify_draft` on any live draft that cites it. Drafts that now fail go
-   back to the Scribe queue, not forward to packaging.
+4. **Re-verify affected drafts.** If a claim changed, check every application
+   that is not submitted yet and uses it (each
+   `applications/<slug>/apply-pack.md` lists its claim ids). Re-run MCP
+   `crew_verify_draft` on its CV and letter text with that job's `job_id`:
+   without `job_id` nothing is recorded and the old PASSED stays in force. A
+   built pack keeps its old CV and letter files, so delete them and rebuild it
+   (honest-cv stage 7). Drafts that now fail go back to the Scribe queue, not
+   forward to packaging.
 5. **Health check and backup.** Run `crew_doctor`. After a significant update,
    offer a backup via MCP `crew_backup` (CLI `crew backup`).
 6. **Summarize.** Report claims added or changed, rules learned, drafts sent back

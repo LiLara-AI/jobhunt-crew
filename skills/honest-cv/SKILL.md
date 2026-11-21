@@ -111,4 +111,4 @@ node "${CLAUDE_PLUGIN_ROOT}/bin/crew.js" tool <crew_tool_name> --workspace "<job
   `crew_blind_review`, `crew_review_record`, `crew_verify_draft`,
   `crew_apply_pack`, `crew_record_event`
 - CLI: `crew job add`, `crew job inspect`, `crew claim verify`,
-  `crew review record`, `crew ledger replay`
+  `crew ledger replay`

@@ -11,7 +11,7 @@ reported to the user instead of being worked around.
   - `.crew/ledger.jsonl` — append-only event ledger (source of truth)
   - `.crew/snapshot.json` — materialized view rebuilt from the ledger
   - `dossier.json` — candidate profile with claim-tagged evidence
-  - `Applications/` — generated application packs
+  - `applications/` — generated application packs
 - Never send workspace state to a remote database or third-party store.
 - State changes go through ledger events (MCP `crew_record_event` or the CLI),
   never by hand-editing `snapshot.json`.

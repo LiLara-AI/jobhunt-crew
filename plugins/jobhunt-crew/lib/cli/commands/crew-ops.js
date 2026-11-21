@@ -87,7 +87,7 @@ async function runApplyPack(rawArgs = []) {
     const screeningAnswers = ApplyPackGenerator.generateScreeningAnswers(dossier, job);
     const preFillPlan = ApplyPackGenerator.buildPreFillPlan(job, dossier);
     const snapshot = loadSnapshot(targetDir);
-    const recorded = ApplyPackGenerator.checksFromApplication(snapshot.applications ? snapshot.applications[job.id] : null);
+    const recorded = ApplyPackGenerator.checksFromApplication(snapshot.applications ? snapshot.applications[job.id] : null, job);
     const blockers = ApplyPackGenerator.submissionBlockers(recorded);
     const written = ApplyPackGenerator.writeApplyPack(targetDir, job.company, job.title, {
       jobUrl: job.canonicalUrl || job.url || '',

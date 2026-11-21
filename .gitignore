@@ -45,3 +45,7 @@ logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
+
+# Workspace backups hold the candidate profile
+crew-backup-*.json
+*.pre-restore

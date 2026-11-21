@@ -64,6 +64,12 @@ test('apply pack reports what is missing, refuses a failed claim check, and writ
     assert.ok(fs.statSync(letter).size > 500);
     assert.doesNotMatch(fs.readFileSync(pack.filePath, 'utf8'), /No cover letter file yet|NOT RUN|blocked/);
 
+    // Rebuilding with the same letter is not a blocker.
+    const same = await server.callTool('crew_apply_pack', {
+      job_id: 'job_1', claims_used: ['C-01'], cover_letter_text: 'Dear hiring team,\n\nPlease find my application attached.'
+    });
+    assert.deepEqual([same.status, same.blockers], ['ready-to-submit', []]);
+
     // A hand-edited letter is kept on rebuild, and the pack says so.
     fs.writeFileSync(letter, 'edited by hand');
     const again = await server.callTool('crew_apply_pack', { job_id: 'job_1', cover_letter_text: 'Dear team,\n\nA newer letter.' });
@@ -109,6 +115,38 @@ test('sector exclusions from search-config.json knock a matching posting out', (
     // A benefit named in the description is not the employer's sector.
     const miss = JobScorer.scoreVacancy({ ...job, company: 'Example Co', description: 'Benefits: medical insurance for your family.' }, preferences, skills);
     assert.notEqual(miss.knockout, 'EXCLUDED_INDUSTRY');
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true });
+  }
+});
+
+test('a backup written by the tool stays in the workspace, and a restore keeps the profile it replaces', async () => {
+  const { ws, server } = await workspace();
+  try {
+    await assert.rejects(server.callTool('crew_backup', { out_file: path.join(os.tmpdir(), 'crew-gates-leak.json') }), /inside the workspace/);
+    const backup = await server.callTool('crew_backup', { out_file: 'my-backup.json' });
+    assert.deepEqual(backup.workspaceFiles, ['dossier.json']);
+    fs.writeFileSync(path.join(ws, 'dossier.json'), '{"claims":[]}', 'utf8');
+    await server.callTool('crew_restore', { file: 'my-backup.json' });
+    assert.equal(fs.readFileSync(path.join(ws, 'dossier.json.pre-restore'), 'utf8'), '{"claims":[]}');
+    assert.equal(fs.readFileSync(path.join(ws, 'dossier.json'), 'utf8'), fs.readFileSync(EXAMPLE, 'utf8'));
+  } finally {
+    fs.rmSync(ws, { recursive: true, force: true });
+  }
+});
+
+test('a job marked ready needs no further checks, and an unrecorded verdict is labelled', async () => {
+  const { ws, server } = await workspace();
+  try {
+    const unrecorded = await server.callTool('crew_apply_pack', { job_id: 'job_1', review_verdict: { verdict: 'APPROVE', overallScore: 4.8 } });
+    assert.match(fs.readFileSync(unrecorded.filePath, 'utf8'), /Blind review: APPROVE \(not recorded\)/);
+    await server.callTool('crew_record_event', {
+      type: 'PACKAGE_MARKED_READY',
+      payload: { jobId: 'job_1', claimVerification: { passed: true, violations: [] }, reviewPanel: { verdict: 'APPROVE' } }
+    });
+    const ready = await server.callTool('crew_apply_pack', { job_id: 'job_1' });
+    assert.deepEqual([ready.status, ready.blockers], ['ready-to-submit', []]);
+    await assert.rejects(server.callTool('crew_record_event', { type: 'CLAIMS_VERIFIED', payload: { jobId: '__proto__', passed: true } }), /cannot be used as a job id/);
   } finally {
     fs.rmSync(ws, { recursive: true, force: true });
   }

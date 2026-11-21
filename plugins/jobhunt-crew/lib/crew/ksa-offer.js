@@ -456,7 +456,7 @@ class KsaOfferCalculator {
 
     const netMonthly = Number((structure.gross - gosi.employeeDeduction).toFixed(2));
 
-    const probationDays = offerTerms.probationDays || 90;
+    const probationDays = offerTerms.probationDays ?? 90; // 0 means no probation, not the default
     const probationIssues = [];
     if (probationDays > 180) {
       probationIssues.push(`Probation of ${probationDays} days violates Article 53 statutory limit of 180 days.`);
