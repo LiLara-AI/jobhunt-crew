@@ -21,8 +21,9 @@ follow-up, or a peer introduction message.
    `HIRING_MANAGER` (relevant delivered impact), or `PEER` (shared technical
    ground). Ask one question if the type or target role is unclear.
 2. **Pick the claim.** Choose a single verified `[C-xx]` claim relevant to the
-   role or team. If no verified claim fits, write a claim-free note instead of
-   stretching one.
+   role or team and pass its id as `claim_id`. If no verified claim fits, write
+   a claim-free note instead of stretching one: pass `claim_id` `"none"`,
+   because with no `claim_id` the tool picks the first verified claim itself.
 3. **Generate the draft.** Use MCP `crew_outreach`, backed by
    `OutreachGenerator.generateOutreach` in `lib/crew/outreach.js` (with
    `getCharCount` and `fitWithinLimit` enforcing the limit). The `RECRUITER`

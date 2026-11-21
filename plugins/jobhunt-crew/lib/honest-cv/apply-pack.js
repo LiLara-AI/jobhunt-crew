@@ -150,7 +150,7 @@ class ApplyPackGenerator {
       artifactNotes.push('No CV was generated: no dossier with a candidate name was available. Create `dossier.json` (setup skill), then rebuild this pack.');
     }
     if (!packData.artifacts && !artifacts.coverLetterDocx) {
-      artifactNotes.push(`No cover letter file yet. Draft it, save it in this folder as \`${names.coverLetterDocx}\` (\`DocGenerator.generateCoverLetterDocx\`), then rebuild this pack.`);
+      artifactNotes.push(`No cover letter file yet. Rebuild this pack with the verified letter in \`cover_letter_text\` to create \`${names.coverLetterDocx}\`.`);
     }
     return { artifacts, artifactNotes };
   }
@@ -191,6 +191,26 @@ class ApplyPackGenerator {
     return { verification, reviewVerdict };
   }
 
+  /**
+   * Gate shared by the MCP tool and the CLI. Throws when the job's recorded
+   * verification failed (rule 3: no pack on a rejected draft); otherwise lists
+   * what is not yet recorded as passed. Only recorded results count, because
+   * the submit gate reads the ledger too.
+   */
+  static submissionBlockers(recorded) {
+    const { verification, reviewVerdict } = recorded || {};
+    if (verification && verification.passed !== true) {
+      throw new Error('GUARDRAIL_VIOLATION: Claim verification FAILED for this job. Fix the draft, re-run crew_verify_draft with job_id until it passes, then build the pack.');
+    }
+    const blockers = [];
+    if (!verification) blockers.push('Claim verification is not recorded for this job: run crew_verify_draft with job_id.');
+    // Exact match, like the submit gate.
+    if (!reviewVerdict || reviewVerdict.verdict !== 'APPROVE') {
+      blockers.push('Blind review is not recorded as APPROVE for this job: run crew_blind_review, then crew_review_record with job_id.');
+    }
+    return blockers;
+  }
+
   static compileApplyPackMarkdown(packData) {
     const {
       company,
@@ -215,10 +235,12 @@ class ApplyPackGenerator {
 
     lines.push(`# Stage 7 Apply Pack: ${company} — ${roleTitle}`);
     lines.push('');
-    lines.push('> **Status**: `ready-to-submit` · Claim verification: ' + verifierLabel + ' · Blind review: ' + reviewLabel);
-    if (verifierLabel !== 'PASSED' || reviewLabel !== 'APPROVE') {
+    const blockers = Array.isArray(packData.blockers) ? packData.blockers : [];
+    lines.push('> **Status**: `' + (blockers.length ? 'blocked' : 'ready-to-submit') + '` · Claim verification: ' + verifierLabel + ' · Blind review: ' + reviewLabel);
+    if (blockers.length || verifierLabel !== 'PASSED' || reviewLabel !== 'APPROVE') {
       lines.push('>');
       lines.push('> ⚠ Do not submit until claim verification has PASSED and the blind review is APPROVE.');
+      for (const b of blockers) lines.push('> - ' + b);
     }
     lines.push('');
 
@@ -317,8 +339,25 @@ class ApplyPackGenerator {
       fs.mkdirSync(appDir, { recursive: true });
     }
 
+    // Cover letter text supplied by the caller. Like the CV, an existing file is kept, never overwritten.
+    let letterKept = '';
+    if (!packData.artifacts && typeof packData.coverLetterText === 'string' && packData.coverLetterText.trim()) {
+      const letterName = `CoverLetter_${slug}.docx`;
+      const letterFile = path.join(appDir, letterName);
+      if (fs.existsSync(letterFile)) {
+        letterKept = `\`${letterName}\` already existed and was kept, so the cover letter text passed in was NOT saved. Delete the file and rebuild to replace it, or rebuild without cover letter text to keep it.`;
+      } else {
+        fs.writeFileSync(letterFile, DocGenerator.generateCoverLetterDocx(packData.coverLetterText));
+      }
+    }
+
     const dossier = packData.dossier || PLAN_DOSSIERS.get(packData.preFillPlan) || null;
     const { artifacts, artifactNotes } = ApplyPackGenerator.renderArtifacts(appDir, slug, dossier, packData);
+    // An unsaved letter is a blocker, not a footnote: the pack must not look ready.
+    if (letterKept) {
+      artifactNotes.push(letterKept);
+      if (Array.isArray(packData.blockers)) packData.blockers.push(letterKept);
+    }
 
     const fullPackData = {
       company,
@@ -330,6 +369,7 @@ class ApplyPackGenerator {
       claimsUsed: packData.claimsUsed || [],
       reviewVerdict: packData.reviewVerdict || null,
       verification: packData.verification || null,
+      blockers: packData.blockers,
       screeningAnswers: packData.screeningAnswers || {},
       preFillPlan: packData.preFillPlan || { safetyGate: { status: 'ready-to-submit' } }
     };

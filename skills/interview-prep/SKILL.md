@@ -34,8 +34,11 @@ Run the simulation in the archetype the user picks (default order below):
    `StarRStoryBank` in `lib/crew/interview-story-bank.js`. Action `list` shows
    confirmed stories; action `add` validates a new story's STAR+R fields and
    claim binding (`validateStory` rejects unbound claims, employer mismatches,
-   and metrics not declared on the claim). Stories bound to unconfirmed claims
-   stay in draft status and are excluded from packs.
+   and entries in the story's `metrics[]` that the claim does not declare).
+   Numbers written only in the result text are not checked, so list every
+   number the story uses in `metrics[]`. Nothing is checked against an empty
+   dossier: run the setup skill first if it has no claims. Stories bound to
+   unconfirmed claims stay in draft status and are excluded from packs.
 3. **Run the mock.** One question, one answer, one rubric score:
    - Structure (STAR+R complete and in order)
    - Evidence (metric present and claim-accurate)

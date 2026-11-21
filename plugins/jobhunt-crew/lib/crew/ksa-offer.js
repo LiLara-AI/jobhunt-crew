@@ -464,10 +464,13 @@ class KsaOfferCalculator {
       probationIssues.push(`Probation is ${probationDays} days. Article 53 requires explicit mutual written agreement to exceed 90 days.`);
     }
 
-    const nonCompete = KsaOfferCalculator.validateNonCompete({
-      durationMonths: offerTerms.nonCompeteMonths,
-      geographicScope: offerTerms.nonCompeteScope
-    });
+    // An offer with no non-compete clause has nothing to flag.
+    const nonCompete = (offerTerms.nonCompeteMonths == null && !offerTerms.nonCompeteScope)
+      ? { isValid: true, stated: false, issues: [], recommendations: [] }
+      : KsaOfferCalculator.validateNonCompete({
+        durationMonths: offerTerms.nonCompeteMonths,
+        geographicScope: offerTerms.nonCompeteScope
+      });
 
     const eosbWageBasis = KsaOfferCalculator.calculateActualWage({
       basic: structure.basic,

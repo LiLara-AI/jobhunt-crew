@@ -141,6 +141,26 @@ class JobScorer {
       };
     }
 
+    // Sector exclusion: a whole-word match in the title or company name. Never the
+    // description, where a benefit such as "medical insurance" would drop a good job.
+    const excludedIndustries = Array.isArray(preferences.excludedIndustries) ? preferences.excludedIndustries : [];
+    const sectorText = `${title} ${company}`;
+    const excludedIndustry = excludedIndustries.find(term => skillMatchesText(sectorText, term));
+    if (excludedIndustry) {
+      return {
+        score: 0.0,
+        verdict: 'FAIL',
+        status: 'FAIL',
+        shortlisted: false,
+        knockout: 'EXCLUDED_INDUSTRY',
+        rationale: `Title or company name mentions excluded sector "${excludedIndustry}"`,
+        dimensions: { titleMatch: 0, locationMatch: 0, techStackMatch: 0, seniorityMatch: 0, watchlistTier: 0 },
+        closingSoon: false,
+        isOpen: job.isOpen !== false,
+        ageBadge: `Open · Posted ${job.postedAgeDays || 0}d ago`
+      };
+    }
+
     // Regional Compliance & Saudization Knockout
     const compliance = KsaCountryPack.evaluateCompliance(textToScan, candidateStatus, { title });
     if (!compliance.eligible) {

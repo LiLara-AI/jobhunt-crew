@@ -53,6 +53,7 @@ function loadTriageProfile(targetDir) {
     targetCountries: [...list(src.targetCountries), ...list(locations.countries)],
     companyWatchlist: [...list(src.companyWatchlist), ...list(src.watchlist)],
     excludedCompanies: [...list(src.excludedCompanies), ...list(knockouts.excludedCompanies)],
+    excludedIndustries: [...list(src.excludedIndustries), ...list(knockouts.excludedIndustries), ...list(knockouts.excludedSubIndustries)],
     targetSeniority: String(src.targetSeniority || knockouts.seniorityFloor || ''),
     candidateStatus: src.candidateStatus || (dossier.candidate && dossier.candidate.workAuthorization) || ''
   };
@@ -244,7 +245,7 @@ async function runJob(subcommand, rawArgs = []) {
         status: result.status,
         verdict: result.verdict,
         shortlisted: result.shortlisted,
-        rationale: rationale || `Auto-triaged score: ${result.score}`,
+        rationale: rationale || result.rationale || `Auto-triaged score: ${result.score}`,
         dimensions: result.dimensions,
         closingSoon: result.closingSoon,
         ageBadge: result.ageBadge

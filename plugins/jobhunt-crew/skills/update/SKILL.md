@@ -24,7 +24,9 @@ drafting preference, change targets, or bring workspace state back in sync.
      `"status": "CONFIRM"`. Never omit `status`: a claim without it counts as
      verified. Read the claim back; once the user confirms the exact wording,
      employer, and metric, call `crew_confirm_claims` with its id (CLI
-     `crew claim confirm --id <ids>`). Never set `VERIFIED` by hand.
+     `crew claim confirm --id <ids>`). Never set `VERIFIED` by hand. For a
+     correction, change the existing claim in place and set its `status` back
+     to `CONFIRM`; a wrong claim left as verified stays usable in drafts.
    - Target changes (titles, cities, countries, knockouts, watchlist): edit
      `search-config.json`, which job scoring reads and which overrides
      `preferences` in `dossier.json` (edit those only when the workspace has no

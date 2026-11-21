@@ -71,7 +71,7 @@ function loadSavedStories(workspace, bank) {
 }
 
 const SERVER_NAME = 'jobhunt-crew-mcp';
-const SERVER_VERSION = '0.2.5';
+const SERVER_VERSION = '0.2.6';
 const PROTOCOL_VERSION = '2024-11-05';
 // Versions this server can speak; echo the client's if listed, else fall back.
 const SUPPORTED_PROTOCOL_VERSIONS = ['2024-11-05', '2025-03-26', '2025-06-18'];
@@ -332,7 +332,7 @@ class McpServer {
 
     this.tools.set('crew_backup', {
       name: 'crew_backup',
-      description: 'Creates a checksum-verified JSON backup of the .crew workspace directory.',
+      description: 'Creates a checksum-verified JSON backup of the .crew workspace directory plus dossier.json and search-config.json.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -402,10 +402,24 @@ class McpServer {
           role_title: { type: 'string', description: 'Role title (required when job_id is absent)' },
           job_url: { type: 'string', description: 'Posting URL' },
           claims_used: { type: 'array', items: { type: 'string' }, description: 'Verified claim IDs cited in the pack' },
-          review_verdict: { type: 'object', description: 'Optional blind review result object to embed' }
+          review_verdict: { type: 'object', description: 'Optional blind review result object to embed' },
+          cover_letter_text: { type: 'string', description: 'Final verified cover letter text; saved in the pack folder as CoverLetter_<slug>.docx' }
         }
       },
       handler: (args) => this.toolApplyPack(args)
+    });
+
+    this.tools.set('crew_read_resume', {
+      name: 'crew_read_resume',
+      description: 'Reads a resume file (.docx, .txt or .md) from the workspace folder and returns its text. PDF is not supported.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          file: { type: 'string', description: 'Resume file path inside the workspace folder' }
+        },
+        required: ['file']
+      },
+      handler: (args) => this.toolReadResume(args)
     });
 
     this.tools.set('crew_blind_review', {
@@ -640,6 +654,8 @@ class McpServer {
       const evidence = payload.evidence || { type: payload.evidenceType, proof: payload.proof };
       GuardrailEngine.validateClosure(evidence);
     }
+
+    if (type === 'FOLLOW_UP_SENT') GuardrailEngine.validateFollowUpSent(payload, this.readSnapshot());
 
     // 2. Append event via EventLedger
     const eventRecord = await this.ledger.appendEvent({
@@ -1122,17 +1138,31 @@ class McpServer {
     const preFillPlan = ApplyPackGenerator.buildPreFillPlan(job, dossier);
     const snapshot = this.readSnapshot();
     const recorded = ApplyPackGenerator.checksFromApplication(job.id && snapshot.applications ? snapshot.applications[job.id] : null);
+    const blockers = ApplyPackGenerator.submissionBlockers(recorded);
+    // The letter saved in the pack must itself pass the verifier, whatever was verified earlier.
+    const coverLetterText = typeof args.cover_letter_text === 'string' && args.cover_letter_text.trim() ? args.cover_letter_text : '';
+    if (coverLetterText) {
+      const check = ClaimVerifier.verifyDraft(dossier, coverLetterText, { targetCompany: job.company });
+      if (check.passed !== true) {
+        throw new Error(`GUARDRAIL_VIOLATION: cover_letter_text failed claim verification (${(check.violations || []).length} violations). Fix it, check it with crew_verify_draft, then build the pack.`);
+      }
+    }
     const written = ApplyPackGenerator.writeApplyPack(this.workspace, job.company, job.title, {
       jobUrl: job.url,
       matchScore: typeof job.score === 'number' ? job.score : undefined,
       claimsUsed: Array.isArray(args.claims_used) ? args.claims_used : [],
-      reviewVerdict: args.review_verdict || recorded.reviewVerdict,
+      // The recorded verdict and score win; a passed-in result only adds its detail.
+      reviewVerdict: recorded.reviewVerdict ? { ...(args.review_verdict || {}), ...recorded.reviewVerdict } : args.review_verdict,
       verification: recorded.verification,
+      coverLetterText,
+      blockers,
       screeningAnswers,
       preFillPlan
     });
     return {
-      status: 'ready-to-submit',
+      // "blocked" until both checks are recorded as passed for this job.
+      status: blockers.length ? 'blocked' : 'ready-to-submit',
+      blockers,
       slug: written.slug,
       filePath: written.filePath,
       relativePath: written.relativePath,
@@ -1141,6 +1171,31 @@ class McpServer {
       screeningAnswers,
       safetyGate: preFillPlan.safetyGate
     };
+  }
+
+  async toolReadResume(args) {
+    if (!args.file) throw new Error('Parameter "file" is required');
+    const file = path.resolve(this.workspace, String(args.file));
+    // Workspace files only: this tool must not become a way to read arbitrary local files.
+    const rel = path.relative(this.workspace, file);
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
+      throw new Error('Resume file must be inside the workspace folder. Copy it there, or paste the resume text instead.');
+    }
+    if (!['.docx', '.txt', '.md'].includes(path.extname(file).toLowerCase())) {
+      throw new Error('Unsupported resume file type. Use .docx, .txt or .md, or paste the resume text instead.');
+    }
+    if (!fs.existsSync(file)) throw new Error(`Resume file not found: ${file}`);
+    // A link or junction inside the workspace must not lead outside it.
+    const realRel = path.relative(fs.realpathSync(this.workspace), fs.realpathSync(file));
+    if (realRel.startsWith('..') || path.isAbsolute(realRel)) {
+      throw new Error('Resume file must be inside the workspace folder. Copy it there, or paste the resume text instead.');
+    }
+    if (fs.statSync(file).size > 5 * 1024 * 1024) {
+      throw new Error('Resume file is larger than 5 MB. Paste the resume text instead.');
+    }
+    const { readResumeFile } = require('../honest-cv/intake-wizard');
+    const text = readResumeFile(file);
+    return { file: rel, characters: text.length, text };
   }
 
   async toolBlindReview(args) {

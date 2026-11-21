@@ -40,8 +40,11 @@ letters. No tool does the apply-or-skip triage for you: you do it in step 2.
    `job_id`; only the latest result per job is kept, so finish each role on a
    pass.
 5. **Package per role.** Run `crew_apply_pack` once per APPLY role with that
-   role's `job_id` and the same `claims_used` list, so every pack renders the
-   same CV content. The tool has no field that links packs: tell the user which
+   role's `job_id`, the same `claims_used` list so every pack renders the
+   same CV content, and that role's letter as `cover_letter_text`. A pack is
+   ready only when its result has `status` `ready-to-submit` and an empty
+   `blockers` list. The tool has no
+   field that links packs: tell the user which
    packs share the CV before they submit anything.
 6. **Order the submissions.** Recommend a submission order (strongest fit first)
    and remind the user that each final submit is theirs, one role at a time.

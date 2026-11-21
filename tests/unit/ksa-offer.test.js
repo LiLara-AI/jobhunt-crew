@@ -71,3 +71,10 @@ test('nationality defaults to non-Saudi in the library and the CLI, and the outp
   assert.equal(cliExpat.evaluation.eosb.finalEosbAmount, cliExpat.eosb.finalEosbAmount);
   assert.equal(cli(['--saudi']).evaluation.nationality.source, 'stated');
 });
+
+test('an offer with no non-compete clause is not reported as having an unbounded one', () => {
+  const none = KsaOfferCalculator.evaluateOffer({ totalSalary: 30000 });
+  assert.deepEqual([none.nonCompete.isValid, none.nonCompete.stated, none.nonCompete.issues], [true, false, []]);
+  const worldwide = KsaOfferCalculator.evaluateOffer({ totalSalary: 30000, nonCompeteMonths: 12, nonCompeteScope: 'Worldwide' });
+  assert.equal(worldwide.nonCompete.isValid, false);
+});
