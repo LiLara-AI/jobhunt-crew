@@ -46,7 +46,8 @@ legal advice; say so once, plainly.
    cannot tell where the employer actually operates: compare the scope with
    that yourself, and flag open-ended wording.
 7. **Negotiation summary.** Use action `evaluate` for the combined report
-   (pass any other fixed monthly allowances as `regular_allowances`, and
+   (pass any other fixed monthly allowances as `regular_allowances`, with
+   `total_salary` as the full monthly gross that already includes them, and
    `probation_days` `0` when the offer has no probation), then
    list asks in priority order (raise basic share before gross, narrow the
    non-compete, clarify probation terms) with short, collaborative phrasing the
